@@ -1,5 +1,5 @@
 streamlit
 plotly
-google-generativeai
+groq
 PyPDF2
 pandas
