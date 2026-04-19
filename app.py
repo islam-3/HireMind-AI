@@ -1,6 +1,6 @@
 import streamlit as st
 import plotly.graph_objects as go
-from google import genai
+import google.generativeai as pal_genai # المكتبة المستقرة
 from PyPDF2 import PdfReader
 import json
 import pandas as pd
@@ -13,7 +13,6 @@ st.markdown("""
     <style>
     .stApp { background-color: #0e1117 !important; color: #ffffff !important; }
     .sidebar-logo { font-size: 1.5rem !important; font-weight: 800 !important; color: #f0f6fc !important; text-align: center !important; margin-bottom: 0px !important; }
-    .sidebar-subtitle { font-size: 0.85rem !important; color: #8b949e !important; text-align: center !important; margin-bottom: 20px !important; }
     [data-testid="stSidebar"] { background-color: #161b22 !important; border-right: 1px solid #30363d !important; }
     .strength-card { background-color: #1c2b1d; border-left: 5px solid #238636; padding: 15px; border-radius: 5px; margin-bottom: 10px; }
     .weakness-card { background-color: #2d1a1a; border-left: 5px solid #da3633; padding: 15px; border-radius: 5px; margin-bottom: 10px; }
@@ -21,49 +20,38 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. SESSION STATE ---
-if "comparison_list" not in st.session_state: 
-    st.session_state.comparison_list = []
+# --- 2. AI CORE LOGIC (المكتبة المستقرة) ---
+API_KEY = "AIzaSyBf7FTT2C68Fg072TB6iatnxrPHgxDBFWQ"
+pal_genai.configure(api_key=API_KEY)
 
-# --- 3. SIDEBAR ---
+def get_detailed_evaluation(cv_text, jd_text):
+    # استخدام الموديل بنظام المكتبة القديمة المستقرة
+    model = pal_genai.GenerativeModel('gemini-1.5-flash')
+    prompt = f"Audit CV vs JD. Return ONLY JSON: {{\"score\": float, \"strengths\": [], \"weaknesses\": [], \"summary\": \"\"}}. CV: {cv_text[:4000]} JD: {jd_text[:1500]}"
+    
+    try:
+        response = model.generate_content(prompt)
+        text = response.text
+        match = re.search(r'\{.*\}', text, re.DOTALL)
+        if match:
+            return json.loads(match.group(0))
+        raise ValueError("Parse Error")
+    except Exception as e:
+        err = str(e)
+        if "429" in err: return {"score": 0, "strengths": ["Busy"], "weaknesses": ["Wait 30s"], "summary": "Quota Limit."}
+        return {"score": 0, "strengths": ["Error"], "weaknesses": [f"Tech: {err[:20]}"], "summary": "System Issue."}
+
+# --- 3. SESSION STATE ---
+if "comparison_list" not in st.session_state: st.session_state.comparison_list = []
+
+# --- 4. SIDEBAR ---
 with st.sidebar:
     st.markdown('<p class="sidebar-logo">🧠 HireMind AI</p>', unsafe_allow_html=True)
-    st.markdown('<p class="sidebar-subtitle">Enterprise Recruitment</p>', unsafe_allow_html=True)
-    st.markdown("---")
-    current_count = len(st.session_state.comparison_list)
-    st.write(f"Candidates Analysed: **{current_count}**")
+    st.write(f"Processed: **{len(st.session_state.comparison_list)}**")
     if st.button("🗑️ Reset All"):
         st.session_state.comparison_list = []
         if "last_res" in st.session_state: del st.session_state.last_res
         st.rerun()
-
-# --- 4. AI CORE LOGIC ---
-# استخدمنا المفتاح الجديد الذي زودتني به
-API_KEY = "AIzaSyBf7FTT2C68Fg072TB6iatnxrPHgxDBFWQ"
-client = genai.Client(api_key=API_KEY)
-
-def get_detailed_evaluation(cv_text, jd_text):
-    # استخدام موديل مستقر جداً لتجنب خطأ 404
-    model_id = "gemini-1.5-flash" 
-    prompt = f"HR Expert Audit. Return JSON ONLY. Format: {{\"score\": float, \"strengths\": [], \"weaknesses\": [], \"summary\": \"\"}}. CV: {cv_text[:5000]} JD: {jd_text[:2000]}"
-    
-    try:
-        response = client.models.generate_content(model=model_id, contents=prompt)
-        text = response.text
-        
-        # استخراج JSON بذكاء
-        match = re.search(r'\{.*\}', text, re.DOTALL)
-        if match:
-            res = json.loads(match.group(0))
-            if res.get('score', 0) > 10: res['score'] = res['score'] / 10
-            return res
-        else:
-            raise ValueError("Invalid Response")
-    except Exception as e:
-        err_str = str(e)
-        if "429" in err_str:
-            return {"score": 0, "strengths": ["Server Busy"], "weaknesses": ["Please wait 30 seconds"], "summary": "Quota Limit."}
-        return {"score": 0, "strengths": ["Audit Error"], "weaknesses": [f"Technical: {err_str[:30]}"], "summary": "System Update required."}
 
 # --- 5. MAIN INTERFACE ---
 st.title("Strategic Talent Analysis")
@@ -71,7 +59,7 @@ col1, col2 = st.columns(2, gap="large")
 
 with col1:
     st.subheader("💼 Job Description")
-    jd_input = st.text_area("Paste Requirements...", height=250, label_visibility="collapsed")
+    jd_input = st.text_area("Requirements...", height=250, label_visibility="collapsed")
 
 with col2:
     st.subheader("👤 Candidate CV")
@@ -80,46 +68,37 @@ with col2:
     
     if uploaded_file and st.button("Run AI Audit"):
         if not c_name or not jd_input:
-            st.warning("Fill all info first.")
+            st.warning("Complete fields.")
         else:
-            with st.spinner("Processing..."):
+            with st.spinner("Analyzing..."):
                 try:
                     reader = PdfReader(uploaded_file)
-                    # تنظيف النص المستخرج
-                    cv_text = ""
-                    for page in reader.pages:
-                        text = page.extract_text()
-                        if text: cv_text += text + " "
-                    
-                    if not cv_text.strip():
-                        st.error("Could not read text from PDF. Is it an image?")
-                    else:
-                        result = get_detailed_evaluation(cv_text, jd_input)
-                        st.session_state.last_res = result
-                        st.session_state.last_name = c_name
-                        st.session_state.comparison_list.append({"Name": c_name, "Score": result['score']})
-                        st.rerun()
-                except Exception as e:
-                    st.error(f"File Error: {str(e)[:50]}")
+                    cv_text = " ".join([p.extract_text() or "" for p in reader.pages])
+                    result = get_detailed_evaluation(cv_text, jd_input)
+                    st.session_state.last_res = result
+                    st.session_state.last_name = c_name
+                    st.session_state.comparison_list.append({"Name": c_name, "Score": result.get('score', 0)})
+                    st.rerun()
+                except: st.error("PDF Error")
 
 # --- 6. RESULTS ---
 if "last_res" in st.session_state:
     res = st.session_state.last_res
     st.markdown("---")
-    c_res1, c_res2 = st.columns([1, 2])
-    with c_res1:
-        fig = go.Figure(go.Indicator(mode="gauge+number", value=res['score'], gauge={'axis': {'range': [0, 10]}}))
+    r_col1, r_col2 = st.columns([1, 2])
+    with r_col1:
+        fig = go.Figure(go.Indicator(mode="gauge+number", value=res.get('score', 0), gauge={'axis': {'range': [0, 10]}}))
         fig.update_layout(height=250, paper_bgcolor='rgba(0,0,0,0)', font={'color': "white"})
         st.plotly_chart(fig, use_container_width=True)
-    with c_res2:
+    with r_col2:
         st.markdown(f"### Verdict: {st.session_state.last_name}")
-        st.info(res.get('summary', 'Done.'))
+        st.info(res.get('summary', ''))
     
-    r1, r2 = st.columns(2)
-    with r1:
+    s1, s2 = st.columns(2)
+    with s1:
         st.markdown("### ✅ Strengths")
         for s in res.get('strengths', []): st.markdown(f'<div class="strength-card">{s}</div>', unsafe_allow_html=True)
-    with r2:
+    with s2:
         st.markdown("### ⚠️ Gaps")
         for w in res.get('weaknesses', []): st.markdown(f'<div class="weakness-card">{w}</div>', unsafe_allow_html=True)
 
