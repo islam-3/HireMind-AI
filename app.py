@@ -6,7 +6,7 @@ import json
 import pandas as pd
 import re
 
-# --- 1. SETTINGS & BRANDING (التصميم الفاخر المعتمد) ---
+# --- 1. SETTINGS & BRANDING ---
 st.set_page_config(page_title="HireMind AI", layout="wide")
 
 st.markdown("""
@@ -17,7 +17,8 @@ st.markdown("""
     [data-testid="stSidebar"] { background-color: #161b22 !important; border-right: 1px solid #30363d !important; }
     .strength-card { background-color: #1c2b1d; border-left: 5px solid #238636; padding: 15px; border-radius: 5px; margin-bottom: 10px; }
     .weakness-card { background-color: #2d1a1a; border-left: 5px solid #da3633; padding: 15px; border-radius: 5px; margin-bottom: 10px; }
-    .stButton>button { background-color: #30363d !important; color: white !important; border: 1px solid #8b949e !important; width: 100%; }
+    .stButton>button { background-color: #30363d !important; color: white !important; border: 1px solid #8b949e !important; width: 100%; border-radius: 8px; font-weight: bold; }
+    .stButton>button:hover { border-color: #58a6ff !important; color: #58a6ff !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -40,36 +41,31 @@ with st.sidebar:
         if "last_res" in st.session_state: del st.session_state.last_res
         st.rerun()
 
-# --- 4. AI CORE LOGIC (التعديل لنسخة 2.0 فلاش) ---
+# --- 4. AI CORE LOGIC (Optimized for 1.5 Flash) ---
+# المفتاح الذي زودتني به
 API_KEY = "AIzaSyBf7FTT2C68Fg072TB6iatnxrPHgxDBFWQ"
 client = genai.Client(api_key=API_KEY)
 
 def get_detailed_evaluation(cv_text, jd_text):
-    prompt = f"""
-    Perform a professional HR Audit. Return JSON ONLY.
-    Structure: {{"score": float, "strengths": ["list"], "weaknesses": ["list"], "summary": "string"}}.
-    Score: 0 to 10.
-    CV: {cv_text}
-    JD: {jd_text}
-    """
+    # تقليص الـ Prompt لتقليل استهلاك الـ Tokens وتفادي الـ Quota
+    prompt = f"Perform HR Audit. Return ONLY JSON. Format: {{\"score\": float, \"strengths\": [], \"weaknesses\": [], \"summary\": \"\"}}. Score 0-10. CV: {cv_text[:4000]} JD: {jd_text[:2000]}"
     try:
-        # التعديل هنا لضمان العثور على الموديل
-        response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+        # استخدام 1.5-flash لأنها توفر حصة مجانية أكبر وأكثر استقراراً
+        response = client.models.generate_content(model="gemini-1.5-flash", contents=prompt)
         text = response.text
         
-        # استخراج JSON باستخدام Regex لضمان الدقة
         match = re.search(r'\{.*\}', text, re.DOTALL)
         if match:
             res = json.loads(match.group(0))
             if res.get('score', 0) > 10: res['score'] = res['score'] / 10
             return res
         else:
-            raise ValueError("Format Error")
+            raise ValueError("Data parse error")
     except Exception as e:
-        error_msg = str(e)
-        if "429" in error_msg:
-            return {"score": 0, "strengths": ["Quota Limit"], "weaknesses": ["Wait 1 min"], "summary": "API Limit reached."}
-        return {"score": 0, "strengths": ["Audit Error"], "weaknesses": [f"Details: {error_msg[:30]}"], "summary": "Analysis failed."}
+        err = str(e)
+        if "429" in err:
+            return {"score": 0, "strengths": ["Server Busy (Quota)"], "weaknesses": ["Wait 30-60 seconds"], "summary": "API Limit reached."}
+        return {"score": 0, "strengths": ["Audit Failed"], "weaknesses": [f"Technical Error: {err[:20]}"], "summary": "Please try a different file."}
 
 # --- 5. MAIN INTERFACE ---
 st.title("Strategic Talent Analysis")
@@ -77,25 +73,28 @@ col1, col2 = st.columns(2, gap="large")
 
 with col1:
     st.subheader("💼 Job Description")
-    jd_input = st.text_area("Paste Requirements...", height=300, label_visibility="collapsed")
+    jd_input = st.text_area("Paste Requirements...", height=250, label_visibility="collapsed")
 
 with col2:
     st.subheader("👤 Candidate CV")
-    c_name = st.text_input("Name:")
+    c_name = st.text_input("Candidate Name:")
     uploaded_file = st.file_uploader("Upload PDF:", type="pdf")
     
     if uploaded_file and st.button("Execute Strategic Audit"):
         if not c_name or not jd_input:
-            st.warning("Please fill all fields.")
+            st.warning("Please provide Name and JD.")
         else:
-            with st.spinner("Auditing..."):
-                reader = PdfReader(uploaded_file)
-                cv_text = "".join([p.extract_text() or "" for p in reader.pages])
-                result = get_detailed_evaluation(cv_text, jd_input)
-                st.session_state.last_res = result
-                st.session_state.last_name = c_name
-                st.session_state.comparison_list.append({"Name": c_name, "Score": result['score']})
-                st.rerun()
+            with st.spinner("AI Analysis in progress..."):
+                try:
+                    reader = PdfReader(uploaded_file)
+                    cv_text = " ".join([p.extract_text() or "" for p in reader.pages])
+                    result = get_detailed_evaluation(cv_text, jd_input)
+                    st.session_state.last_res = result
+                    st.session_state.last_name = c_name
+                    st.session_state.comparison_list.append({"Name": c_name, "Score": result['score']})
+                    st.rerun()
+                except:
+                    st.error("Error reading PDF. Try another file.")
 
 # --- 6. DISPLAY RESULTS ---
 if "last_res" in st.session_state:
@@ -113,7 +112,7 @@ if "last_res" in st.session_state:
     
     with c_res2:
         st.markdown(f"### 📋 Audit Verdict: {st.session_state.last_name}")
-        st.info(res.get('summary', ''))
+        st.info(res.get('summary', 'Analysis completed.'))
     
     r1, r2 = st.columns(2)
     with r1:
@@ -125,7 +124,7 @@ if "last_res" in st.session_state:
         for w in res.get('weaknesses', []):
             st.markdown(f'<div class="weakness-card">{w}</div>', unsafe_allow_html=True)
 
-# --- 7. RANKING ---
+# --- 7. LEADERBOARD ---
 if st.session_state.comparison_list:
     st.markdown("---")
     st.subheader("📊 Ranking Leaderboard")
