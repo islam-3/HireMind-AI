@@ -1,96 +1,104 @@
 import streamlit as st
 import plotly.graph_objects as go
-import google.generativeai as pal_genai # المكتبة المستقرة
-from PyPDF2 import PdfReader
+import requests
 import json
+from PyPDF2 import PdfReader
 import pandas as pd
 import re
 
-# --- 1. SETTINGS & BRANDING ---
+# --- 1. إعدادات الصفحة والتصميم الفاخر ---
 st.set_page_config(page_title="HireMind AI", layout="wide")
 
 st.markdown("""
     <style>
-    .stApp { background-color: #0e1117 !important; color: #ffffff !important; }
-    .sidebar-logo { font-size: 1.5rem !important; font-weight: 800 !important; color: #f0f6fc !important; text-align: center !important; margin-bottom: 0px !important; }
-    [data-testid="stSidebar"] { background-color: #161b22 !important; border-right: 1px solid #30363d !important; }
-    .strength-card { background-color: #1c2b1d; border-left: 5px solid #238636; padding: 15px; border-radius: 5px; margin-bottom: 10px; }
-    .weakness-card { background-color: #2d1a1a; border-left: 5px solid #da3633; padding: 15px; border-radius: 5px; margin-bottom: 10px; }
-    .stButton>button { background-color: #30363d !important; color: white !important; border: 1px solid #8b949e !important; width: 100%; border-radius: 8px; }
+    .stApp { background-color: #0e1117; color: #ffffff; }
+    [data-testid="stSidebar"] { background-color: #161b22; border-right: 1px solid #30363d; min-width: 250px; }
+    .sidebar-logo { font-size: 1.5rem; font-weight: 800; color: #f0f6fc; text-align: center; margin-bottom: 5px; }
+    .strength-card { background-color: #1c2b1d; border-left: 5px solid #238636; padding: 12px; border-radius: 5px; margin-bottom: 10px; }
+    .weakness-card { background-color: #2d1a1a; border-left: 5px solid #da3633; padding: 12px; border-radius: 5px; margin-bottom: 10px; }
+    .stButton>button { background-color: #30363d !important; color: white !important; width: 100%; border-radius: 8px; border: 1px solid #8b949e; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. AI CORE LOGIC (المكتبة المستقرة) ---
-API_KEY = "AIzaSyBf7FTT2C68Fg072TB6iatnxrPHgxDBFWQ"
-pal_genai.configure(api_key=API_KEY)
+# --- 2. إدارة الجلسة (لإصلاح القائمة الجانبية) ---
+if "comparison_list" not in st.session_state:
+    st.session_state.comparison_list = []
+if "last_res" not in st.session_state:
+    st.session_state.last_res = None
 
-def get_detailed_evaluation(cv_text, jd_text):
-    # استخدام الموديل بنظام المكتبة القديمة المستقرة
-    model = pal_genai.GenerativeModel('gemini-1.5-flash')
-    prompt = f"Audit CV vs JD. Return ONLY JSON: {{\"score\": float, \"strengths\": [], \"weaknesses\": [], \"summary\": \"\"}}. CV: {cv_text[:4000]} JD: {jd_text[:1500]}"
+# --- 3. وظيفة الاتصال المباشر بجوجل (لتجنب خطأ 404) ---
+def get_ai_analysis(cv_text, jd_text):
+    api_key = "AIzaSyBf7FTT2C68Fg072TB6iatnxrPHgxDBFWQ"
+    # هذا الرابط هو الرابط الرسمي المباشر
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    
+    headers = {'Content-Type': 'application/json'}
+    payload = {
+        "contents": [{
+            "parts": [{
+                "text": f"Analyze CV vs Job Description. Return ONLY JSON. Format: {{\"score\": 7.5, \"strengths\": [\"point\"], \"weaknesses\": [\"point\"], \"summary\": \"text\"}}. CV: {cv_text[:5000]} JD: {jd_text[:2000]}"
+            }]
+        }]
+    }
     
     try:
-        response = model.generate_content(prompt)
-        text = response.text
-        match = re.search(r'\{.*\}', text, re.DOTALL)
-        if match:
+        response = requests.post(url, headers=headers, json=payload)
+        data = response.json()
+        
+        if response.status_code == 200:
+            raw_text = data['candidates'][0]['content']['parts'][0]['text']
+            # استخراج الـ JSON من النص
+            match = re.search(r'\{.*\}', raw_text, re.DOTALL)
             return json.loads(match.group(0))
-        raise ValueError("Parse Error")
+        else:
+            return {"score": 0, "strengths": ["API Error"], "weaknesses": [f"Status: {response.status_code}"], "summary": "Connection Issue."}
     except Exception as e:
-        err = str(e)
-        if "429" in err: return {"score": 0, "strengths": ["Busy"], "weaknesses": ["Wait 30s"], "summary": "Quota Limit."}
-        return {"score": 0, "strengths": ["Error"], "weaknesses": [f"Tech: {err[:20]}"], "summary": "System Issue."}
+        return {"score": 0, "strengths": ["Error"], "weaknesses": [str(e)[:30]], "summary": "System Issue."}
 
-# --- 3. SESSION STATE ---
-if "comparison_list" not in st.session_state: st.session_state.comparison_list = []
-
-# --- 4. SIDEBAR ---
+# --- 4. القائمة الجانبية ثابتة ---
 with st.sidebar:
     st.markdown('<p class="sidebar-logo">🧠 HireMind AI</p>', unsafe_allow_html=True)
-    st.write(f"Processed: **{len(st.session_state.comparison_list)}**")
-    if st.button("🗑️ Reset All"):
+    st.markdown("---")
+    st.write(f"Candidates Analysed: **{len(st.session_state.comparison_list)}**")
+    if st.button("🗑️ Reset Sessions"):
         st.session_state.comparison_list = []
-        if "last_res" in st.session_state: del st.session_state.last_res
+        st.session_state.last_res = None
         st.rerun()
 
-# --- 5. MAIN INTERFACE ---
+# --- 5. الواجهة الرئيسية ---
 st.title("Strategic Talent Analysis")
-col1, col2 = st.columns(2, gap="large")
+col1, col2 = st.columns(2, gap="medium")
 
 with col1:
     st.subheader("💼 Job Description")
-    jd_input = st.text_area("Requirements...", height=250, label_visibility="collapsed")
+    jd_input = st.text_area("Paste here...", height=250, label_visibility="collapsed")
 
 with col2:
     st.subheader("👤 Candidate CV")
     c_name = st.text_input("Name:")
     uploaded_file = st.file_uploader("Upload PDF:", type="pdf")
     
-    if uploaded_file and st.button("Run AI Audit"):
-        if not c_name or not jd_input:
-            st.warning("Complete fields.")
-        else:
-            with st.spinner("Analyzing..."):
-                try:
-                    reader = PdfReader(uploaded_file)
-                    cv_text = " ".join([p.extract_text() or "" for p in reader.pages])
-                    result = get_detailed_evaluation(cv_text, jd_input)
-                    st.session_state.last_res = result
-                    st.session_state.last_name = c_name
-                    st.session_state.comparison_list.append({"Name": c_name, "Score": result.get('score', 0)})
-                    st.rerun()
-                except: st.error("PDF Error")
+    if uploaded_file and st.button("Run Strategic Audit"):
+        if c_name and jd_input:
+            with st.spinner("Processing..."):
+                reader = PdfReader(uploaded_file)
+                text = " ".join([p.extract_text() or "" for p in reader.pages])
+                result = get_ai_analysis(text, jd_input)
+                st.session_state.last_res = result
+                st.session_state.last_name = c_name
+                st.session_state.comparison_list.append({"Name": c_name, "Score": result.get('score', 0)})
+                st.rerun()
 
-# --- 6. RESULTS ---
-if "last_res" in st.session_state:
+# --- 6. عرض النتائج ---
+if st.session_state.last_res:
     res = st.session_state.last_res
     st.markdown("---")
-    r_col1, r_col2 = st.columns([1, 2])
-    with r_col1:
-        fig = go.Figure(go.Indicator(mode="gauge+number", value=res.get('score', 0), gauge={'axis': {'range': [0, 10]}}))
+    r1, r2 = st.columns([1, 2])
+    with r1:
+        fig = go.Figure(go.Indicator(mode="gauge+number", value=res.get('score', 0), gauge={'axis': {'range': [0, 10]}, 'bar': {'color': "#8b949e"}}))
         fig.update_layout(height=250, paper_bgcolor='rgba(0,0,0,0)', font={'color': "white"})
         st.plotly_chart(fig, use_container_width=True)
-    with r_col2:
+    with r2:
         st.markdown(f"### Verdict: {st.session_state.last_name}")
         st.info(res.get('summary', ''))
     
@@ -104,4 +112,5 @@ if "last_res" in st.session_state:
 
 if st.session_state.comparison_list:
     st.markdown("---")
+    st.subheader("📊 Ranking")
     st.table(pd.DataFrame(st.session_state.comparison_list))
