@@ -5,7 +5,7 @@ from PyPDF2 import PdfReader
 import json
 import pandas as pd
 
-# --- 1. SETTINGS & BRANDING (العودة للتصميم الفخم) ---
+# --- 1. SETTINGS & BRANDING (التصميم الفخم مع لوجو أكبر) ---
 st.set_page_config(page_title="CareerMind AI", layout="wide")
 
 st.markdown("""
@@ -13,21 +13,22 @@ st.markdown("""
     .stApp { background-color: #0e1117; color: #ffffff; }
     [data-testid="stSidebar"] { background-color: #161b22; border-right: 1px solid #30363d; }
     
-    /* تكبير اللوجو وتحسين مظهره */
+    /* تكبير اللوجو بشكل ملحوظ */
     .sidebar-logo { 
-        font-size: 2.5rem; 
+        font-size: 3.5rem; /* تم تكبير الخط هنا */
         font-weight: 900; 
         color: #f0f6fc; 
         text-align: center; 
-        margin-top: 20px;
+        margin-top: 30px;
         margin-bottom: 0px;
-        letter-spacing: -1px;
+        letter-spacing: -2px;
+        line-height: 1;
     }
     .sidebar-subtitle {
-        font-size: 0.85rem;
+        font-size: 1rem;
         color: #8b949e;
         text-align: center;
-        margin-bottom: 30px;
+        margin-bottom: 40px;
     }
     
     /* بطاقات النتائج */
@@ -43,7 +44,6 @@ st.markdown("""
         font-weight: bold; 
         width: 100%; 
     }
-    .stButton>button:hover { border-color: #8b949e; }
     
     /* صندوق الرسالة */
     .letter-box { 
@@ -65,7 +65,7 @@ except:
     st.error("Missing API Key in Secrets.")
     st.stop()
 
-# حفظ البيانات للتنقل بين الصفحات
+# حفظ البيانات للتنقل
 if "last_cv_text" not in st.session_state: st.session_state.last_cv_text = ""
 if "last_jd_text" not in st.session_state: st.session_state.last_jd_text = ""
 if "history" not in st.session_state: st.session_state.history = []
@@ -73,7 +73,7 @@ if "current_result" not in st.session_state: st.session_state.current_result = N
 
 # --- 3. FUNCTIONS ---
 def get_groq_analysis(cv_text, jd_text):
-    prompt = f"As a Career Coach, compare CV to JD. Return ONLY JSON: {{'score': float(0-10), 'strengths': [], 'weaknesses': [], 'summary': ''}}. CV: {cv_text[:6000]} JD: {jd_text[:2000]}"
+    prompt = f"As a Career Coach, compare CV to JD. Return ONLY JSON: {{'score': float, 'strengths': [], 'weaknesses': [], 'summary': ''}}. CV: {cv_text[:6000]} JD: {jd_text[:2000]}"
     completion = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[{"role": "user", "content": prompt}],
@@ -82,14 +82,14 @@ def get_groq_analysis(cv_text, jd_text):
     return json.loads(completion.choices[0].message.content)
 
 def generate_cover_letter(cv_text, jd_text, tone):
-    prompt = f"Write a {tone} cover letter for a candidate based on this CV and JD. Focus on matching skills. CV: {cv_text[:5000]} JD: {jd_text[:1500]}"
+    prompt = f"Write a {tone} cover letter for a candidate based on this CV and JD. CV: {cv_text[:5000]} JD: {jd_text[:1500]}"
     completion = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[{"role": "user", "content": prompt}]
     )
     return completion.choices[0].message.content
 
-# --- 4. SIDEBAR (اللوجو الكبير والتنقل) ---
+# --- 4. SIDEBAR (اللوجو الضخم) ---
 with st.sidebar:
     st.markdown('<p class="sidebar-logo">🧠 CareerMind</p>', unsafe_allow_html=True)
     st.markdown('<p class="sidebar-subtitle">Master Your Job Application</p>', unsafe_allow_html=True)
@@ -171,4 +171,4 @@ elif page == "✉️ Cover Letter":
 # --- 7. PAGE: INTERVIEW PREP ---
 elif page == "🎙️ Interview Prep":
     st.title("Interview Preparation")
-    st.info("This section will generate custom questions based on your CV gaps. (Next Step)")
+    st.info("Coming Next: Custom Questions based on your profile!")
