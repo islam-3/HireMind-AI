@@ -6,138 +6,105 @@ import json
 import pandas as pd
 
 # --- 1. SETTINGS & BRANDING ---
-st.set_page_config(page_title="HireMind AI", layout="wide")
+st.set_page_config(page_title="CareerMind AI", layout="wide")
 
-# CSS لتعديل الألوان والمظهر الفخم
 st.markdown("""
     <style>
     .stApp { background-color: #0e1117; color: #ffffff; }
     [data-testid="stSidebar"] { background-color: #161b22; border-right: 1px solid #30363d; }
-    .sidebar-logo { font-size: 1.5rem; font-weight: 800; color: #f0f6fc; text-align: center; margin-bottom: 20px; }
-    .strength-card { background-color: #1c2b1d; border-left: 5px solid #238636; padding: 15px; border-radius: 5px; margin-bottom: 10px; }
-    .weakness-card { background-color: #2d1a1a; border-left: 5px solid #da3633; padding: 15px; border-radius: 5px; margin-bottom: 10px; }
-    .stButton>button { background-color: #30363d !important; color: white !important; width: 100%; border-radius: 8px; border: 1px solid #8b949e; }
+    .sidebar-logo { font-size: 1.8rem; font-weight: 900; color: #f0f6fc; text-align: center; margin-bottom: 0px; }
+    .status-card { background: linear-gradient(145deg, #161b22, #30363d); padding: 15px; border-radius: 12px; border: 1px solid #484f58; text-align: center; }
+    .stButton>button { background-color: #238636 !important; color: white !important; border-radius: 8px; border: none; font-weight: bold; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. INITIALIZE GROQ CLIENT ---
+# --- 2. INITIALIZE GROQ ---
 try:
     client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-except Exception as e:
-    st.error("Missing API Key in Streamlit Secrets!")
+except:
+    st.error("API Key configuration error.")
     st.stop()
-
-def get_groq_analysis(cv_text, jd_text):
-    prompt = f"""
-    As an expert HR Auditor, compare this CV with the Job Description.
-    Return ONLY a valid JSON object with this structure:
-    {{
-      "score": float (0-10),
-      "strengths": ["list of 3 key strengths"],
-      "weaknesses": ["list of 3 gaps/weaknesses"],
-      "summary": "one professional sentence overview"
-    }}
-    CV Text: {cv_text[:6000]}
-    JD Text: {jd_text[:2000]}
-    """
-    try:
-        completion = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": prompt}],
-            response_format={"type": "json_object"}
-        )
-        return json.loads(completion.choices[0].message.content)
-    except Exception as e:
-        return {"score": 0, "strengths": ["Audit Fail"], "weaknesses": [str(e)[:30]], "summary": "Technical check required."}
 
 # --- 3. SESSION STATE ---
 if "history" not in st.session_state: st.session_state.history = []
 if "current_result" not in st.session_state: st.session_state.current_result = None
 
-# --- 4. SIDEBAR (التصميم الجديد والفخم) ---
+# --- 4. SIDEBAR NAVIGATION ---
 with st.sidebar:
-    st.markdown('<p style="font-size: 2.2rem; font-weight: 900; color: #f0f6fc; text-align: center; margin-bottom: 0px;">🧠 HireMind</p>', unsafe_allow_html=True)
-    st.markdown('<p style="font-size: 0.9rem; color: #8b949e; text-align: center; margin-bottom: 30px;">Strategic AI Auditing</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sidebar-logo">🚀 CareerMind</p>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align:center; color:#8b949e; font-size:0.8rem;">Master Your Job Application</p>', unsafe_allow_html=True)
     st.markdown("---")
     
-    total_candidates = len(st.session_state.history)
-    st.markdown(f"""
-        <div style="background: linear-gradient(145deg, #161b22, #30363d); padding: 20px; border-radius: 15px; border: 1px solid #484f58; text-align: center;">
-            <p style="color: #8b949e; margin: 0; font-size: 0.8rem; text-transform: uppercase;">Total Candidates</p>
-            <p style="color: #ffffff; margin: 0; font-size: 2.5rem; font-weight: bold;">{total_candidates}</p>
-        </div>
-    """, unsafe_allow_html=True)
+    # اختيار الصفحة
+    page = st.radio("Navigation", ["🔍 CV Matcher", "✉️ Cover Letter", "🎙️ Interview Prep"])
     
-    st.markdown("<br>", unsafe_allow_html=True)
-
+    st.markdown("---")
     if st.session_state.history:
-        st.markdown('<p style="color: #f0f6fc; font-weight: bold; font-size: 1.1rem;">📝 History</p>', unsafe_allow_html=True)
-        for entry in reversed(st.session_state.history[-5:]):
-            color = "#238636" if entry['Score'] >= 7 else "#d29922" if entry['Score'] >= 5 else "#da3633"
-            st.markdown(f"""
-                <div style="padding: 10px; border-bottom: 1px solid #30363d; font-size: 0.9rem;">
-                    <span style="color: {color}; font-weight: bold;">{entry['Score']}/10</span> 
-                    <span style="color: #c9d1d9; margin-left: 10px;">{entry['Name']}</span>
-                </div>
-            """, unsafe_allow_html=True)
+        st.markdown("**Your Top Versions:**")
+        hist_df = pd.DataFrame(st.session_state.history).sort_values(by="Score", ascending=False)
+        for _, row in hist_df.iterrows():
+            st.write(f"⭐ {row['Score']}/10 - {row['Name']}")
+
+# --- 5. PAGE: CV MATCHER ---
+if page == "🔍 CV Matcher":
+    st.title("Optimize Your Application")
+    st.write("Compare your CV against the Job Description to find gaps and improve your score.")
     
-    st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("🗑️ Reset Sessions"):
-        st.session_state.history = []
-        st.session_state.current_result = None
-        st.rerun()
-
-# --- 5. MAIN INTERFACE ---
-st.title("Strategic Talent Analysis")
-c1, c2 = st.columns(2, gap="large")
-
-with c1:
-    st.subheader("💼 Job Description")
-    jd_input = st.text_area("Paste JD here...", height=250, label_visibility="collapsed")
-
-with c2:
-    st.subheader("👤 Candidate CV")
-    name = st.text_input("Candidate Name:")
-    file = st.file_uploader("Upload PDF:", type="pdf")
+    col1, col2 = st.columns(2, gap="large")
     
-    if file and st.button("Run Strategic Audit"):
-        if name and jd_input:
-            with st.spinner("AI Analysis in progress..."):
-                reader = PdfReader(file)
-                text = " ".join([p.extract_text() or "" for p in reader.pages])
-                res = get_groq_analysis(text, jd_input)
-                st.session_state.current_result = {"name": name, "data": res}
-                st.session_state.history.append({"Name": name, "Score": res['score']})
-                st.rerun()
-
-# --- 6. DISPLAY RESULTS ---
-if st.session_state.current_result:
-    res = st.session_state.current_result['data']
-    st.markdown("---")
-    res_c1, res_c2 = st.columns([1, 2])
-    
-    with res_c1:
-        fig = go.Figure(go.Indicator(
-            mode="gauge+number", 
-            value=res['score'],
-            gauge={'axis': {'range': [0, 10]}, 'bar': {'color': "#8b949e"}}
-        ))
-        fig.update_layout(height=280, paper_bgcolor='rgba(0,0,0,0)', font={'color': "white"})
-        st.plotly_chart(fig, use_container_width=True)
+    with col1:
+        st.subheader("📋 Targeted Job Description")
+        jd_input = st.text_area("Paste the job requirements here...", height=200)
         
-    with res_c2:
-        st.markdown(f"### Verdict: {st.session_state.current_result['name']}")
-        st.info(res['summary'])
+    with col2:
+        st.subheader("📄 Your CV (PDF)")
+        version_name = st.text_input("Version Name (e.g., CV with Python focus):")
+        file = st.file_uploader("Upload your resume:", type="pdf")
         
-    s_col1, s_col2 = st.columns(2)
-    with s_col1:
-        st.markdown("### ✅ Strengths")
-        for s in res['strengths']: st.markdown(f'<div class="strength-card">{s}</div>', unsafe_allow_html=True)
-    with s_col2:
-        st.markdown("### ⚠️ Gaps")
-        for w in res['weaknesses']: st.markdown(f'<div class="weakness-card">{w}</div>', unsafe_allow_html=True)
+        if file and st.button("Analyze My Match Score"):
+            if jd_input and version_name:
+                with st.spinner("AI is auditing your profile..."):
+                    reader = PdfReader(file)
+                    text = " ".join([p.extract_text() or "" for p in reader.pages])
+                    
+                    # نستخدم نفس وظيفة الـ Groq السابقة
+                    prompt = f"Compare this CV to JD. Return JSON: {{'score':.., 'strengths':[], 'weaknesses':[], 'summary':''}}. CV: {text[:5000]} JD: {jd_input[:2000]}"
+                    completion = client.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[{"role": "user", "content": prompt}],
+                        response_format={"type": "json_object"}
+                    )
+                    res = json.loads(completion.choices[0].message.content)
+                    st.session_state.current_result = {"name": version_name, "data": res}
+                    st.session_state.history.append({"Name": version_name, "Score": res['score']})
+                    st.rerun()
 
-if st.session_state.history:
-    st.markdown("---")
-    st.subheader("📊 Ranking Leaderboard")
-    st.table(pd.DataFrame(st.session_state.history).sort_values(by="Score", ascending=False))
+    if st.session_state.current_result:
+        res = st.session_state.current_result['data']
+        st.markdown("---")
+        # عرض النتائج بنفس التنسيق الفخم السابق مع تعديل المسميات
+        r1, r2 = st.columns([1, 2])
+        with r1:
+            fig = go.Figure(go.Indicator(mode="gauge+number", value=res['score'], gauge={'axis': {'range': [0, 10]}}))
+            fig.update_layout(height=250, paper_bgcolor='rgba(0,0,0,0)', font={'color': "white"})
+            st.plotly_chart(fig, use_container_width=True)
+        with r2:
+            st.success(f"Audit for: {st.session_state.current_result['name']}")
+            st.write(res['summary'])
+            
+        c_a, c_b = st.columns(2)
+        with c_a:
+            st.markdown("### 🏆 Your Competitive Edges")
+            for s in res['strengths']: st.info(s)
+        with c_b:
+            st.markdown("### 🛠️ Areas to Improve")
+            for w in res['weaknesses']: st.warning(w)
+
+# --- 6. PLACEHOLDERS FOR NEW PAGES ---
+elif page == "✉️ Cover Letter":
+    st.title("AI Cover Letter Generator")
+    st.info("This feature will use your uploaded CV and JD to write a perfect letter. (Coming in the next step)")
+
+elif page == "🎙️ Interview Prep":
+    st.title("Interview Preparation")
+    st.info("Prepare for questions based on your specific profile. (Coming in the next step)")
