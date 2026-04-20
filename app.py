@@ -5,7 +5,7 @@ from PyPDF2 import PdfReader
 import json
 import pandas as pd
 
-# --- 1. SETTINGS & BRANDING (التصميم الفخم مع لوجو متوازن) ---
+# --- 1. SETTINGS & BRANDING (اللوجو الأنيق بالحجم المطلوب) ---
 st.set_page_config(page_title="CareerMind AI", layout="wide")
 
 st.markdown("""
@@ -13,31 +13,31 @@ st.markdown("""
     .stApp { background-color: #0e1117; color: #ffffff; }
     [data-testid="stSidebar"] { background-color: #161b22; border-right: 1px solid #30363d; }
     
-    /* اللوجو بحجم وسط منطقي وفخم */
+    /* اللوجو بحجم أنيق وبسيط */
     .sidebar-logo { 
-        font-size: 2.5rem !important; 
+        font-size: 1.8rem !important; 
         font-weight: 800 !important; 
         color: #f0f6fc !important; 
         text-align: center !important; 
-        margin-top: 20px !important;
-        margin-bottom: 5px !important;
-        letter-spacing: -1px !important;
+        margin-top: 15px !important;
+        margin-bottom: 2px !important;
+        letter-spacing: -0.5px !important;
         display: block !important;
     }
     
     .sidebar-subtitle {
-        font-size: 0.9rem !important;
+        font-size: 0.8rem !important;
         color: #8b949e !important;
         text-align: center !important;
-        margin-bottom: 30px !important;
-        opacity: 0.8;
+        margin-bottom: 25px !important;
+        opacity: 0.7;
     }
     
     /* بطاقات النتائج */
-    .edge-card { background-color: #1c2b1d; border-left: 5px solid #238636; padding: 15px; border-radius: 5px; margin-bottom: 10px; }
-    .improve-card { background-color: #2d1a1a; border-left: 5px solid #da3633; padding: 15px; border-radius: 5px; margin-bottom: 10px; }
+    .edge-card { background-color: #1c2b1d; border-left: 5px solid #238636; padding: 12px; border-radius: 5px; margin-bottom: 8px; font-size: 0.9rem; }
+    .improve-card { background-color: #2d1a1a; border-left: 5px solid #da3633; padding: 12px; border-radius: 5px; margin-bottom: 8px; font-size: 0.9rem; }
     
-    /* تنسيق الأزرار */
+    /* الأزرار */
     .stButton>button { 
         background-color: #30363d !important; 
         color: white !important; 
@@ -80,7 +80,9 @@ with st.sidebar:
     
     if st.session_state.history:
         st.markdown("**Top Versions:**")
-        for entry in sorted(st.session_state.history, key=lambda x: x['Score'], reverse=True):
+        # ترتيب النتائج من الأعلى للأقل
+        sorted_hist = sorted(st.session_state.history, key=lambda x: x['Score'], reverse=True)
+        for entry in sorted_hist:
             st.write(f"⭐ {entry['Score']} - {entry['Name']}")
     
     if st.button("🗑️ Reset Sessions"):
@@ -118,7 +120,7 @@ if page == "🔍 CV Matcher":
         r1, r2 = st.columns([1, 2])
         with r1:
             fig = go.Figure(go.Indicator(mode="gauge+number", value=res['score'], gauge={'axis': {'range': [0, 10]}, 'bar': {'color': "#8b949e"}}))
-            fig.update_layout(height=280, paper_bgcolor='rgba(0,0,0,0)', font={'color': "white"})
+            fig.update_layout(height=250, paper_bgcolor='rgba(0,0,0,0)', font={'color': "white"})
             st.plotly_chart(fig, use_container_width=True)
         with r2:
             st.info(res['summary'])
@@ -130,11 +132,11 @@ if page == "🔍 CV Matcher":
                 st.markdown("#### ⚠️ Areas to Improve")
                 for w in res['weaknesses']: st.markdown(f'<div class="improve-card">{w}</div>', unsafe_allow_html=True)
 
-# أماكن الصفحات الأخرى
+# الصفحات القادمة
 elif page == "✉️ Cover Letter":
     st.title("AI Cover Letter Generator")
-    st.info("Feature integration in progress...")
+    st.info("Coming soon: Professional drafting based on your CV.")
 
 elif page == "🎙️ Interview Prep":
     st.title("Interview Preparation")
-    st.info("Preparing questions based on your profile...")
+    st.info("Coming soon: Mock questions for your gaps.")
