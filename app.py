@@ -4,75 +4,77 @@ from groq import Groq
 from PyPDF2 import PdfReader
 import json
 
-# --- 1. CSS الثابت (بدون تغيير لضمان استقرار التصميم) ---
+# --- 1. التنسيق الحديدي (Fixed CSS) لضمان ثبات التصميم ---
 st.set_page_config(page_title="CareerMind AI", layout="wide")
 st.markdown("""
     <style>
     .stApp { background-color: #0e1117; color: #ffffff; }
     [data-testid="stSidebar"] { background-color: #161b22; border-right: 1px solid #30363d; }
-    .audit-box { background-color: #143224; color: #aff5b4; padding: 15px; border-radius: 8px; border: 1px solid #238636; margin-top: 35px; min-height: 110px; font-size: 0.9rem; }
-    .card-edge { background-color: #162a45; padding: 12px; border-radius: 6px; margin-bottom: 10px; color: #58a6ff; border: 1px solid #30363d; min-height: 50px; font-size: 0.9rem; }
-    .card-improve { background-color: #2b2d16; padding: 12px; border-radius: 6px; margin-bottom: 10px; color: #d29922; border: 1px solid #30363d; min-height: 50px; font-size: 0.9rem; }
+    .audit-box { background-color: #143224; color: #aff5b4; padding: 15px; border-radius: 8px; border: 1px solid #238636; margin-top: 35px; min-height: 110px; max-height: 110px; overflow-y: auto; font-size: 0.9rem; }
+    .card-edge { background-color: #162a45; padding: 12px; border-radius: 6px; margin-bottom: 10px; color: #58a6ff; border: 1px solid #30363d; min-height: 50px; display: flex; align-items: center; font-size: 0.9rem; }
+    .card-improve { background-color: #2b2d16; padding: 12px; border-radius: 6px; margin-bottom: 10px; color: #d29922; border: 1px solid #30363d; min-height: 50px; display: flex; align-items: center; font-size: 0.9rem; }
+    .history-item { padding: 10px; border-radius: 5px; background: #21262d; margin-bottom: 5px; border-left: 4px solid #238636; font-size: 0.85rem; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. التحليل المنطقي (Logic Update) ---
+# --- 2. إدارة الجلسة والمنطق ---
 if "history" not in st.session_state: st.session_state.history = []
 if "analysis_result" not in st.session_state: st.session_state.analysis_result = None
+client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
 def run_analysis(cv_text, jd_text):
-    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-    # تحديث البرومبت ليكون "واقعي" وليس "محطم" للنتائج
+    # برومبت عادل لضمان نتائج منطقية غير محطمة
     prompt = f"""
-    You are a FAIR and Professional Recruiter. 
-    Evaluate the CV against the JD using a balanced 10-point scale:
-    - 8-10: Excellent match.
-    - 6-7: Good match, minor gaps.
-    - 4-5: Fair match, needs significant upskilling.
-    - 0-3: Poor match.
-    
-    CRITICAL: Do not give extremely low scores (like 0.8) if the candidate has relevant soft skills or basic experience.
-    Return ONLY JSON: 
-    {{
-      "score": float (realistic score out of 10), 
-      "strengths": ["Identify 3-4 specific matching skills"], 
-      "weaknesses": ["Identify 2-3 actual gaps"], 
-      "summary": "Encouraging yet professional summary of the match."
-    }}
+    You are a FAIR and Professional Recruiter. Evaluate the CV against the JD.
+    CRITICAL: Avoid extremely low scores (like 0.8) if basic skills are present. Use a realistic 10-point scale.
+    Return ONLY JSON: {{ "score": float, "strengths": [], "weaknesses": [], "summary": "" }}
     CV: {cv_text[:5000]} | JD: {jd_text[:1500]}
     """
     chat = client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}], response_format={"type": "json_object"})
     return json.loads(chat.choices[0].message.content)
 
-# --- 3. SIDEBAR & MAIN (كما هي لثبات التصميم) ---
+# --- 3. القائمة الجانبية (Sidebar) مع زر الريسيت ---
 with st.sidebar:
     st.markdown('<h1 style="text-align:center;">🧠 CareerMind</h1>', unsafe_allow_html=True)
     st.markdown("---")
     page = st.radio("Navigation", ["🔍 CV Matcher", "✉️ Cover Letter", "🎙️ Interview Prep", "💰 Salary Insight"])
+    
+    # قسم سجل النسخ وزر الريسيت
     if st.session_state.history:
         st.markdown("<br><b>Top Versions:</b>", unsafe_allow_html=True)
         for item in reversed(st.session_state.history):
-            st.markdown(f'<div style="padding:8px; background:#21262d; border-left:3px solid #238636; margin-bottom:5px;">⭐ {item["score"]}/10 - {item["name"]}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="history-item">⭐ {item["score"]}/10 - {item["name"]}</div>', unsafe_allow_html=True)
+        
+        # زر الريسيت لمسح كافة البيانات والجلسات
+        if st.button("Reset Sessions", use_container_width=True):
+            st.session_state.history = []
+            st.session_state.analysis_result = None
+            if "generated_cl" in st.session_state: del st.session_state.generated_cl
+            if "salary_data" in st.session_state: del st.session_state.salary_data
+            st.rerun()
 
+# --- 4. الصفحة الرئيسية ---
 if page == "🔍 CV Matcher":
     st.title("Strategic Application Audit")
-    c1, c2 = st.columns(2, gap="large")
-    with c1:
+    col1, col2 = st.columns(2, gap="large")
+    with col1:
         st.markdown("### 📋 Job Description")
-        jd_input = st.text_area("JD", height=180, label_visibility="collapsed")
-    with c2:
+        jd_input = st.text_area("JD", height=200, label_visibility="collapsed")
+    with col2:
         st.markdown("### 👤 Your CV")
-        v_name = st.text_input("Version Name:", placeholder="Islam V1")
-        pdf_file = st.file_uploader("Upload", type="pdf", label_visibility="collapsed")
+        v_name = st.text_input("Version Name:", placeholder="e.g. Sales Role")
+        pdf_file = st.file_uploader("Upload PDF", type="pdf", label_visibility="collapsed")
         if st.button("Analyze Match Score", use_container_width=True):
             if pdf_file and jd_input:
-                reader = PdfReader(pdf_file)
-                cv_txt = " ".join([p.extract_text() for p in reader.pages])
-                res = run_analysis(cv_txt, jd_input)
-                st.session_state.analysis_result = {"name": v_name, "data": res}
-                st.session_state.history.append({"name": v_name, "score": res['score']})
-                st.rerun()
+                with st.spinner("Analyzing..."):
+                    reader = PdfReader(pdf_file)
+                    cv_txt = " ".join([p.extract_text() for p in reader.pages])
+                    res = run_analysis(cv_txt, jd_input)
+                    st.session_state.analysis_result = {"name": v_name, "data": res}
+                    st.session_state.history.append({"name": v_name, "score": res['score']})
+                    st.rerun()
 
+    # عرض النتائج الثابتة
     if st.session_state.analysis_result:
         data = st.session_state.analysis_result['data']
         st.markdown("<br><hr>", unsafe_allow_html=True)
@@ -92,3 +94,5 @@ if page == "🔍 CV Matcher":
         with b2:
             st.markdown("#### 🛠️ Areas to Improve")
             for w in data['weaknesses']: st.markdown(f'<div class="card-improve">{w}</div>', unsafe_allow_html=True)
+
+# الصفحات الأخرى (Cover Letter / Salary) تضاف هنا بنفس النمط...
