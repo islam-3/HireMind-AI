@@ -111,7 +111,7 @@ elif page == "✉️ Cover Letter":
     if st.session_state.gen_cl:
         st.text_area("Result", value=st.session_state.gen_cl, height=450)
 
-# --- 6. SALARY INSIGHT (USD Conversion & Stability) ---
+# --- 6. SALARY INSIGHT (Local Currency & Stability) ---
 elif page == "💰 Salary Insight":
     st.title("Market Value Estimator")
     s_l, s_r = st.columns(2, gap="large")
@@ -122,15 +122,11 @@ elif page == "💰 Salary Insight":
         s_pdf = st.file_uploader("Upload CV for skill-based audit", type="pdf", key="s_cv")
         if st.button("Estimate Stable Range", use_container_width=True):
             if role and loc:
-                with st.spinner("Calculating market value and USD conversion..."):
+                with st.spinner("Calculating market value..."):
                     cv_txt = read_pdf(s_pdf)
                     prompt = f"""
                     Estimate salary for {role} in {loc}. Skills: {cv_txt[:1000]}.
-                    Return JSON: {{
-                        "min": int, "max": int, "avg": int, "currency": str, 
-                        "min_usd": int, "max_usd": int, "notes": str
-                    }}
-                    Base the USD conversion on April 2026 rates.
+                    Return JSON: {{"min": int, "max": int, "avg": int, "currency": str, "notes": str}}
                     """
                     res = json.loads(client.chat.completions.create(
                         model="llama-3.3-70b-versatile", 
@@ -144,12 +140,7 @@ elif page == "💰 Salary Insight":
     if st.session_state.salary_data:
         sd = st.session_state.salary_data
         st.markdown("---")
-        m1, m2 = st.columns(2)
-        with m1:
-            st.metric("Local Currency Range", f"{sd['min']:,} - {sd['max']:,} {sd['currency']}")
-        with m2:
-            st.metric("USD Equivalent", f"${sd['min_usd']:,} - ${sd['max_usd']:,}")
-        
-        st.markdown(f"**Average:** {sd['avg']:,} {sd['currency']}")
+        st.subheader(f"Estimated Range: {sd['min']:,} - {sd['max']:,} {sd['currency']}")
+        st.markdown(f"**Market Average:** {sd['avg']:,} {sd['currency']}")
         st.progress(0.65)
         st.info(f"📌 {sd['notes']}")
