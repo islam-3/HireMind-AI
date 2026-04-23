@@ -4,72 +4,64 @@ from groq import Groq
 from PyPDF2 import PdfReader
 import json
 
-# --- 1. FIXED & STABLE UI CONFIG ---
+# --- 1. FIXED UI & THEME ---
 st.set_page_config(page_title="CareerMind AI", layout="wide")
 
 st.markdown("""
     <style>
-    /* Global Styles */
     .stApp { background-color: #0d1117; color: #e6edf3; }
     [data-testid="stSidebar"] { background-color: #010409 !important; border-right: 1px solid #30363d; }
     
-    /* Result Cards */
-    .result-card {
-        background: rgba(22, 27, 34, 0.6);
-        border: 1px solid #30363d;
-        border-radius: 12px;
-        padding: 25px;
-    }
+    /* Global Reset/Action Buttons */
+    .reset-btn { border: 1px solid #f85149 !important; color: #f85149 !important; }
     
-    /* Badges for Edges/Improvements */
+    /* Result Styling */
+    .result-card { background: rgba(22, 27, 34, 0.6); border: 1px solid #30363d; border-radius: 12px; padding: 25px; }
     .badge { padding: 10px; border-radius: 8px; margin-bottom: 10px; border-left: 5px solid; }
     .badge-pos { background: rgba(46, 160, 67, 0.1); border-color: #238636; color: #3fb950; }
     .badge-neg { background: rgba(248, 81, 73, 0.1); border-color: #da3633; color: #f85149; }
     
-    /* Professional Green Button */
-    div.stButton > button {
-        background-color: #238636 !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 8px !important;
-        font-weight: bold;
-        height: 3em;
-    }
+    /* Standard Green Button */
+    div.stButton > button { background-color: #238636 !important; color: white !important; border-radius: 8px !important; font-weight: bold; }
     </style>
     """, unsafe_allow_html=True)
 
 # --- 2. CORE LOGIC ---
 client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-if "history" not in st.session_state: st.session_state.history = []
+
+# تهيئة الجلسة لجميع الصفحات
+for key in ["history", "last_res", "gen_cl", "salary_data"]:
+    if key not in st.session_state: st.session_state[key] = None if key != "history" else []
 
 def read_pdf(file):
     reader = PdfReader(file)
     return " ".join([p.extract_text() for p in reader.pages if p.extract_text()])
 
-# --- 3. NAVIGATION ---
+# --- 3. SIDEBAR (With Global Reset) ---
 with st.sidebar:
     st.markdown("<h2 style='text-align: center; color: #58a6ff;'>🧠 CareerMind</h2>", unsafe_allow_html=True)
     st.markdown("---")
-    page = st.radio("NAVIGATION", ["🔍 CV Matcher", "✉️ Cover Letter", "🎙️ Interview Prep"])
+    page = st.radio("NAVIGATION", ["🔍 CV Matcher", "✉️ Cover Letter", "🎙️ Interview Prep", "💰 Salary Insight"])
+    
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    if st.button("🗑️ Reset All Progress", use_container_width=True):
+        for key in st.session_state.keys(): del st.session_state[key]
+        st.rerun()
 
-# --- 4. CV MATCHER (Left: JD | Right: CV) ---
+# --- 4. CV MATCHER ---
 if page == "🔍 CV Matcher":
     st.title("Strategic Application Audit")
-    
-    # Input Area with fixed layout
     col_left, col_right = st.columns(2, gap="large")
-    
     with col_left:
-        st.markdown("### 📋 Job Description")
-        jd_input = st.text_area("Paste the requirements here", height=250, label_visibility="collapsed", placeholder="Paste Job Description...")
-        
+        st.subheader("📋 Job Description")
+        jd_input = st.text_area("Requirements", height=250, label_visibility="collapsed", placeholder="Paste JD...")
     with col_right:
-        st.markdown("### 👤 Your Profile")
-        v_name = st.text_input("Candidate/Version Name", placeholder="e.g., Islam - Sales Executive")
-        pdf_file = st.file_uploader("Upload CV (PDF)", type="pdf")
-        if st.button("Analyze Match Score", use_container_width=True):
+        st.subheader("👤 Profile Upload")
+        v_name = st.text_input("Version Name")
+        pdf_file = st.file_uploader("Upload CV", type="pdf", key="cv_m")
+        if st.button("Launch Analysis", use_container_width=True):
             if pdf_file and jd_input:
-                with st.spinner("Analyzing data..."):
+                with st.spinner("Analyzing..."):
                     cv_txt = read_pdf(pdf_file)
                     p = f"Analyze CV vs JD. Return JSON: {{'score': float, 'strengths': [], 'weaknesses': [], 'summary': ''}}. CV: {cv_txt[:3000]} JD: {jd_input[:1500]}"
                     res = json.loads(client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": p}], response_format={"type": "json_object"}).choices[0].message.content)
@@ -77,47 +69,58 @@ if page == "🔍 CV Matcher":
                     st.session_state.history.append({"name": v_name, "score": res['score']})
                     st.rerun()
 
-    # Organized Results
-    if "last_res" in st.session_state:
-        st.markdown("---")
+    if st.session_state.last_res:
         data = st.session_state.last_res
+        st.markdown("---")
         r1, r2 = st.columns([1, 2])
         with r1:
-            fig = go.Figure(go.Indicator(mode="gauge+number", value=data['score'], number={'suffix': "/10", 'font':{'color':'white'}},
-                gauge={'axis': {'range': [0, 10]}, 'bar': {'color': "#238636"}, 'bgcolor': "#30363d"}))
-            fig.update_layout(height=250, margin=dict(t=30, b=0), paper_bgcolor='rgba(0,0,0,0)')
+            fig = go.Figure(go.Indicator(mode="gauge+number", value=data['score'], number={'suffix': "/10", 'font':{'color':'white'}}, gauge={'axis': {'range': [0, 10]}, 'bar': {'color': "#238636"}}))
+            fig.update_layout(height=250, paper_bgcolor='rgba(0,0,0,0)')
             st.plotly_chart(fig, use_container_width=True)
         with r2:
             st.markdown(f'<div class="result-card"><b>AI Verdict:</b><br>{data["summary"]}</div>', unsafe_allow_html=True)
-            
-        st.markdown("<br>", unsafe_allow_html=True)
+        
         l1, l2 = st.columns(2)
         with l1:
-            st.markdown("#### 🏆 Competitive Edges")
             for s in data['strengths']: st.markdown(f'<div class="badge badge-pos">✓ {s}</div>', unsafe_allow_html=True)
         with l2:
-            st.markdown("#### 🛠️ Areas to Improve")
             for w in data['weaknesses']: st.markdown(f'<div class="badge badge-neg">! {w}</div>', unsafe_allow_html=True)
 
-# --- 5. COVER LETTER (Left: JD | Right: CV) ---
+# --- 5. COVER LETTER ---
 elif page == "✉️ Cover Letter":
     st.title("AI Cover Letter Architect")
-    st.markdown("Build a high-impact letter tailored to your specific CV.")
-    
-    cl_left, cl_right = st.columns(2, gap="large")
-    with cl_left:
-        cl_jd = st.text_area("Target Job Description", height=250, placeholder="Paste JD here...")
-    with cl_right:
-        cl_pdf = st.file_uploader("Upload CV for tailored writing", type="pdf")
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("Generate Tailored Letter", use_container_width=True):
-            with st.spinner("Writing masterpiece..."):
-                cv_text = read_pdf(cl_pdf) if cl_pdf else "General experience"
-                p = f"Write a professional cover letter. JD: {cl_jd[:1000]} CV: {cv_text[:2500]}"
+    col_left, col_right = st.columns(2, gap="large")
+    with col_left:
+        cl_jd = st.text_area("Job Description", height=250)
+    with col_right:
+        cl_pdf = st.file_uploader("Upload CV", type="pdf", key="cl_u")
+        if st.button("Generate Letter", use_container_width=True):
+            with st.spinner("Writing..."):
+                cv_txt = read_pdf(cl_pdf) if cl_pdf else ""
+                p = f"Write a professional cover letter for: {cl_jd[:1000]} based on: {cv_txt[:2000]}"
                 st.session_state.gen_cl = client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": p}]).choices[0].message.content
                 st.rerun()
+    if st.session_state.gen_cl:
+        st.text_area("Result", value=st.session_state.gen_cl, height=400)
 
-    if "gen_cl" in st.session_state:
-        st.markdown("---")
-        st.subheader("📄 Generated Draft")
-        st.text_area("Final Output", value=st.session_state.gen_cl, height=450, label_visibility="collapsed")
+# --- 6. SALARY INSIGHT (أعيدت بترتيب سليم) ---
+elif page == "💰 Salary Insight":
+    st.title("Market Value Estimator")
+    col_left, col_right = st.columns(2, gap="large")
+    with col_left:
+        role = st.text_input("Job Title", placeholder="e.g. Software Engineer")
+        loc = st.text_input("Location", placeholder="e.g. Dubai, Remote, etc.")
+    with col_right:
+        sal_pdf = st.file_uploader("Upload CV for skill-based pricing", type="pdf", key="sal_u")
+        if st.button("Estimate Salary Range", use_container_width=True):
+            with st.spinner("Fetching market data..."):
+                cv_txt = read_pdf(sal_pdf) if sal_pdf else ""
+                p = f"Estimate salary for {role} in {loc} based on these skills: {cv_txt[:1500]}. Return JSON: {{'min': int, 'max': int, 'avg': int, 'currency': str, 'notes': ''}}"
+                st.session_state.salary_data = json.loads(client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": p}], response_format={"type": "json_object"}).choices[0].message.content)
+                st.rerun()
+    
+    if st.session_state.salary_data:
+        sd = st.session_state.salary_data
+        st.markdown(f"### Estimated Range: {sd['min']:,} - {sd['max']:,} {sd['currency']}")
+        st.progress(0.7) # visual indicator
+        st.info(sd['notes'])
