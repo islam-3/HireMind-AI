@@ -4,161 +4,136 @@ from groq import Groq
 from PyPDF2 import PdfReader
 import json
 
-# --- 1. UI ENHANCEMENTS (ألوان حيوية مع هيكل ثابت) ---
+# --- 1. التنسيق الأنيق والهادئ (Minimalist Design) ---
 st.set_page_config(page_title="CareerMind AI", layout="wide")
 
 st.markdown("""
     <style>
-    /* تحسين الخلفية العامة */
+    /* خلفية متدرجة خفيفة جداً لإعطاء حياة */
     .stApp { 
-        background: radial-gradient(circle at top right, #1a1f25, #0e1117); 
+        background: linear-gradient(180deg, #0e1117 0%, #161b22 100%); 
         color: #e6edf3; 
     }
     
-    /* تنسيق العناوين الجانبية والقوائم */
+    /* تنسيق القائمة الجانبية */
     [data-testid="stSidebar"] { background-color: #0d1117 !important; border-right: 1px solid #30363d; }
     
-    /* بطاقات النتائج الملونة (بدون تغيير الترتيب) */
-    .result-card {
-        background: rgba(22, 27, 34, 0.6);
-        border: 1px solid #30363d;
+    /* العناوين الملونة بنعومة */
+    h1, h2, h3 { color: #58a6ff; font-family: 'Segoe UI', sans-serif; }
+    
+    /* بطاقات النتائج: شفافة ومنظمة */
+    .result-box {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(240, 246, 252, 0.1);
         border-radius: 12px;
         padding: 20px;
-        margin-bottom: 15px;
+        margin-top: 15px;
     }
     
-    /* لمسة جمالية لنقاط القوة والضعف */
-    .strength-tag {
-        background: rgba(46, 160, 67, 0.15);
-        color: #3fb950;
-        padding: 8px 12px;
-        border-radius: 6px;
-        border-left: 4px solid #238636;
-        margin-bottom: 8px;
-        font-weight: 500;
-    }
-    .weakness-tag {
-        background: rgba(248, 81, 73, 0.1);
-        color: #f85149;
-        padding: 8px 12px;
-        border-radius: 6px;
-        border-left: 4px solid #da3633;
-        margin-bottom: 8px;
-        font-weight: 500;
-    }
+    /* نقاط القوة والضعف (تصميم احترافي) */
+    .tag { padding: 10px 15px; border-radius: 8px; margin-bottom: 10px; font-size: 14px; display: flex; align-items: center; }
+    .tag-plus { background: rgba(63, 185, 80, 0.1); border-left: 4px solid #238636; color: #56d364; }
+    .tag-minus { background: rgba(248, 81, 73, 0.1); border-left: 4px solid #da3633; color: #ffa198; }
     
-    /* صندوق الملخص الاحترافي */
-    .summary-text {
-        background: linear-gradient(90deg, rgba(35, 134, 54, 0.1), transparent);
-        padding: 15px;
-        border-radius: 8px;
-        border: 1px solid rgba(48, 54, 61, 0.5);
-        line-height: 1.6;
-    }
-    
-    /* أزرار مفعمة بالحيوية */
+    /* تحسين شكل الأزرار */
     div.stButton > button {
-        background: linear-gradient(135deg, #238636 0%, #2ea043 100%);
+        border-radius: 8px;
+        background-color: #238636;
         color: white;
         border: none;
-        transition: 0.3s;
-    }
-    div.stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(46, 160, 67, 0.3);
+        font-weight: bold;
+        padding: 0.5rem 2rem;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. LOGIC ---
-if "history" not in st.session_state: st.session_state.history = []
+# --- 2. الوظائف الأساسية ---
 client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+if "history" not in st.session_state: st.session_state.history = []
 
 def read_pdf(file):
     reader = PdfReader(file)
     return " ".join([p.extract_text() for p in reader.pages if p.extract_text()])
 
-# --- 3. SIDEBAR ---
+# --- 3. القائمة الجانبية (Navigation) ---
 with st.sidebar:
-    st.markdown("<h2 style='text-align: center; color: #58a6ff;'>🧠 CareerMind</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center;'>🧠 CareerMind</h2>", unsafe_allow_html=True)
     st.markdown("---")
-    page = st.radio("Navigation", ["🔍 CV Matcher", "✉️ Cover Letter", "🎙️ Interview Prep", "💰 Salary Insight"])
+    page = st.radio("القائمة الرئيسية", ["🔍 CV Matcher", "✉️ Cover Letter", "🎙️ Interview Prep", "💰 Salary Insight"])
     
     if st.session_state.history:
-        st.markdown("<br><b>Activity Trace:</b>", unsafe_allow_html=True)
+        st.markdown("<br><b>آخر العمليات:</b>", unsafe_allow_html=True)
         for item in reversed(st.session_state.history[-3:]):
-            st.caption(f"📍 {item['name']} - Score: {item['score']}")
-        if st.button("Reset Sessions", use_container_width=True):
-            st.session_state.history = []; st.rerun()
+            st.caption(f"✅ {item['name']} ({item['score']}/10)")
 
-# --- 4. PAGE: CV MATCHER (ترتيب ثابت مع لمسات ألوان) ---
+# --- 4. صفحة CV Matcher (ترتيب عمودي سليم) ---
 if page == "🔍 CV Matcher":
     st.title("Strategic Application Audit")
     
-    # قسم المدخلات (أعمدة متوازنة)
+    # قسم المدخلات: جنباً إلى جنب بوضوح
     col1, col2 = st.columns(2, gap="large")
     with col1:
-        st.markdown("#### 📋 Job Description")
-        jd_input = st.text_area("Input JD", height=250, label_visibility="collapsed", placeholder="Paste the job requirements here...")
+        st.subheader("📋 وصف الوظيفة")
+        jd_input = st.text_area("انسخ متطلبات الوظيفة هنا", height=250, label_visibility="collapsed")
     with col2:
-        st.markdown("#### 👤 Candidate File")
-        v_name = st.text_input("Version Name:", placeholder="e.g. Islam - Senior Role")
-        pdf_file = st.file_uploader("Upload CV (PDF)", type="pdf")
-        if st.button("Launch Analysis", use_container_width=True):
+        st.subheader("👤 ملف المتقدم")
+        v_name = st.text_input("اسم النسخة (مثال: سيرة ذاتية - مبرمج)")
+        pdf_file = st.file_uploader("ارفع السيرة الذاتية (PDF)", type="pdf")
+        if st.button("بدء التحليل الذكي", use_container_width=True):
             if pdf_file and jd_input:
-                with st.spinner("Processing Data..."):
+                with st.spinner("جاري التحليل..."):
                     cv_txt = read_pdf(pdf_file)
-                    p = f"Analyze CV vs JD. Return JSON: {{'score': float, 'strengths': [], 'weaknesses': [], 'summary': ''}}. CV: {cv_txt[:3500]} JD: {jd_input[:1500]}"
+                    p = f"Analyze CV vs JD. Return JSON: {{'score': float, 'strengths': [], 'weaknesses': [], 'summary': ''}}. CV: {cv_txt[:3000]} JD: {jd_input[:1500]}"
                     res = json.loads(client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": p}], response_format={"type": "json_object"}).choices[0].message.content)
                     st.session_state.last_res = res
                     st.session_state.history.append({"name": v_name, "score": res['score']})
                     st.rerun()
 
-    # عرض النتائج (بنظام البطاقات الشفافة دون تغيير الترتيب)
+    # قسم النتائج: يظهر فقط بعد التحليل وبشكل مرتب
     if "last_res" in st.session_state:
-        data = st.session_state.last_res
         st.markdown("---")
+        data = st.session_state.last_res
         
-        # الصف الأول: العداد والملخص
+        # توزيع النتائج: العداد يسار والملخص يمين
         res_col1, res_col2 = st.columns([1, 2], gap="medium")
         with res_col1:
-            fig = go.Figure(go.Indicator(mode="gauge+number", value=data['score'], number={'suffix': "/10", 'font':{'color':'#ffffff'}},
+            fig = go.Figure(go.Indicator(mode="gauge+number", value=data['score'], number={'suffix': "/10", 'font':{'color':'white'}},
                 gauge={'axis': {'range': [0, 10]}, 'bar': {'color': "#238636"}, 'bgcolor': "#30363d"}))
-            fig.update_layout(height=230, margin=dict(t=30, b=0, l=10, r=10), paper_bgcolor='rgba(0,0,0,0)')
+            fig.update_layout(height=250, margin=dict(t=30, b=0), paper_bgcolor='rgba(0,0,0,0)')
             st.plotly_chart(fig, use_container_width=True)
         with res_col2:
-            st.markdown(f'<div class="summary-text"><b>AI Analysis Verdict:</b><br>{data["summary"]}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="result-box"><b>📝 ملخص الذكاء الاصطناعي:</b><br><p style="color:#8b949e; margin-top:10px;">{data["summary"]}</p></div>', unsafe_allow_html=True)
             
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # الصف الثاني: النقاط جنباً إلى جنب
-        list_col1, list_col2 = st.columns(2, gap="medium")
+        # نقاط القوة والتحسين جنباً إلى جنب
+        list_col1, list_col2 = st.columns(2)
         with list_col1:
-            st.markdown("<p style='color:#3fb950; font-weight:bold;'>🏆 Competitive Edges</p>", unsafe_allow_html=True)
-            for s in data['strengths']: st.markdown(f'<div class="strength-tag">✓ {s}</div>', unsafe_allow_html=True)
+            st.markdown("### 🏆 نقاط القوة")
+            for s in data['strengths']: st.markdown(f'<div class="tag tag-plus">● {s}</div>', unsafe_allow_html=True)
         with list_col2:
-            st.markdown("<p style='color:#f85149; font-weight:bold;'>🛠️ Areas to Improve</p>", unsafe_allow_html=True)
-            for w in data['weaknesses']: st.markdown(f'<div class="weakness-tag">⚠ {w}</div>', unsafe_allow_html=True)
+            st.markdown("### 🛠️ فرص التحسين")
+            for w in data['weaknesses']: st.markdown(f'<div class="tag tag-minus">● {w}</div>', unsafe_allow_html=True)
 
-# --- 5. PAGE: COVER LETTER (تصميم متوازن) ---
+# --- 5. صفحة Cover Letter (بسيطة ومباشرة) ---
 elif page == "✉️ Cover Letter":
     st.title("AI Cover Letter Architect")
-    st.info("Upload your CV and provide the Job Description to generate a tailored letter.")
+    st.markdown('<div class="result-box">ارفع ملفك وضع وصف الوظيفة لنقوم بصياغة رسالة احترافية مخصصة لك.</div>', unsafe_allow_html=True)
     
-    cl_col1, cl_col2 = st.columns(2, gap="large")
-    with cl_col1:
-        cl_jd = st.text_area("Target Job Description", height=200)
-        cl_pdf = st.file_uploader("Use CV Context (Optional)", type="pdf")
-    with cl_col2:
+    c1, c2 = st.columns(2, gap="large")
+    with c1:
+        cl_jd = st.text_area("وصف الوظيفة المستهدفة", height=200)
+        cl_pdf = st.file_uploader("السيرة الذاتية (اختياري)", type="pdf")
+    with c2:
         st.markdown("<br><br>", unsafe_allow_html=True)
-        if st.button("Generate Tailored Letter", use_container_width=True):
-            with st.spinner("Architecting your letter..."):
-                cv_text = read_pdf(cl_pdf) if cl_pdf else "Generic Professional Background"
-                p = f"Write a high-impact cover letter. JD: {cl_jd[:1000]} CV: {cv_text[:2000]}"
+        if st.button("توليد الرسالة الآن", use_container_width=True):
+            with st.spinner("جاري الكتابة..."):
+                cv_text = read_pdf(cl_pdf) if cl_pdf else "Generic background"
+                p = f"Write a professional cover letter for this JD: {cl_jd[:1000]} based on: {cv_text[:2000]}"
                 st.session_state.gen_cl = client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": p}]).choices[0].message.content
                 st.rerun()
 
     if "gen_cl" in st.session_state:
         st.markdown("---")
-        st.markdown("#### ✨ Generated Draft")
-        st.text_area("Final Output", value=st.session_state.gen_cl, height=450, label_visibility="collapsed")
+        st.subheader("📄 المسودة المقترحة")
+        st.text_area("", value=st.session_state.gen_cl, height=400)
