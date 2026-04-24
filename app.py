@@ -13,21 +13,26 @@ st.markdown("""
     .stApp { background-color: #0d1117; color: #e6edf3; }
     [data-testid="stSidebar"] { background-color: #010409 !important; border-right: 1px solid #30363d; }
     
-    /* Logo Styling - Increased Size */
+    /* Logo Styling - Centered & Balanced */
     .sidebar-logo {
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* سنتر اللوغو */
+        justify-content: center;
+        width: 100%;
         text-align: center; 
-        font-size: 2.2rem !important; /* تكبير اللوغو */
+        font-size: 2.2rem !important;
         font-weight: bold;
         color: #58a6ff;
-        margin-bottom: 5px;
+        padding-top: 20px;
     }
     
-    /* Sidebar Footer for Reset Button */
-    .sidebar-footer {
-        position: fixed;
-        bottom: 20px;
-        width: 260px;
-        padding: 10px;
+    .sidebar-subtext {
+        text-align: center;
+        width: 100%;
+        color: #8b949e;
+        font-size: 0.9rem;
+        margin-bottom: 20px;
     }
     
     /* Result Cards */
@@ -60,16 +65,17 @@ def read_pdf(file):
         return " ".join([p.extract_text() for p in reader.pages if p.extract_text()])
     except: return ""
 
-# --- 3. SIDEBAR (Navigation & Footer Reset) ---
+# --- 3. SIDEBAR (Logo, Nav, & Balanced Reset) ---
 with st.sidebar:
+    # اللوغو الموحد والموسطن
     st.markdown('<div class="sidebar-logo">🧠 CareerMind</div>', unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #8b949e; font-size: 0.9rem;'>Master Your Job Application</p>", unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-subtext">Master Your Job Application</div>', unsafe_allow_html=True)
     st.markdown("---")
     
     page = st.radio("NAVIGATION", ["🔍 CV Matcher", "✉️ Cover Letter", "🎙️ Interview Prep", "💰 Salary Insight"])
     
-    # دفع زر الريسيت لأسفل القائمة الجانبية
-    st.markdown("<br>" * 10, unsafe_allow_html=True) 
+    # مباعدة الزر ليكون في المنتصف تحت خيارات التنقل
+    st.markdown("<br>" * 4, unsafe_allow_html=True) 
     if st.button("🗑️ Reset All Progress", use_container_width=True):
         for key in list(st.session_state.keys()):
             del st.session_state[key]
