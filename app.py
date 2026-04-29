@@ -8,7 +8,7 @@ except ImportError:
 # --- 1. إعدادات الصفحة ---
 st.set_page_config(page_title="CareerMind AI", layout="wide", initial_sidebar_state="collapsed")
 
-# --- 2. كود الـ CSS المطور ---
+# --- 2. كود الـ CSS (القالب المعتمد + التعديلات الجديدة) ---
 st.markdown("""
     <style>
     [data-testid="stAppViewBlockContainer"] {
@@ -36,7 +36,7 @@ st.markdown("""
     .feature-grid { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 50px; }
     .service-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 30px 15px; width: 220px; text-align: center; }
 
-    /* تنسيق زر الدخول وزر التحليل (تصغير الحجم) */
+    /* تنسيق الأزرار الخضراء */
     div.stButton > button {
         background: linear-gradient(135deg, #238636 0%, #2ea043 100%) !important;
         padding: 8px 30px !important;
@@ -45,23 +45,24 @@ st.markdown("""
         color: white !important;
         font-weight: bold !important;
         border: none !important;
-        width: auto !important; /* ليكون الحجم على قدر النص */
-        min-width: 200px;
+        width: auto !important;
+        min-width: 220px;
         display: block;
         margin: 0 auto;
     }
 
-    /* --- تنسيقات الأدوات الداخلية المعدلة --- */
+    /* تنسيق رأس الأداة الداخلي */
     .tool-header {
         background: rgba(255, 255, 255, 0.03);
         padding: 15px 25px;
         border-radius: 12px;
         border: 1px solid rgba(88, 166, 255, 0.2);
-        margin-bottom: 25px;
+        margin-bottom: 30px;
     }
     .tool-header h2 { color: #58a6ff; margin: 0; font-size: 1.5rem !important; }
     .tool-header p { color: #8b949e; margin: 5px 0 0 0; font-size: 0.9rem; }
     
+    /* تحسين شكل النصوص */
     .stTextArea textarea { background-color: rgba(255, 255, 255, 0.05) !important; color: white !important; }
     [data-testid="stSidebar"] { background-color: #0d1117 !important; }
     </style>
@@ -76,7 +77,7 @@ if "GROQ_API_KEY" not in st.secrets:
 
 # --- 4. العرض ---
 if not st.session_state.entered:
-    # الواجهة الأولى (ثابتة كما طلبت)
+    # الواجهة الأولى الثابتة
     st.markdown('<div class="hero-container"><h1 class="main-title">CareerMind AI</h1><p class="tagline">Architecting Your Professional Future</p></div>', unsafe_allow_html=True)
     st.markdown("""
         <div class="feature-grid">
@@ -91,20 +92,22 @@ if not st.session_state.entered:
         st.rerun()
 
 else:
-    # الواجهة الداخلية (المعدلة)
+    # الواجهة الداخلية
     with st.sidebar:
         st.markdown("<h3 style='text-align:center; color:#58a6ff;'>🧠 CareerMind</h3>", unsafe_allow_html=True)
         st.markdown("---")
         page = st.radio("Executive Tools", ["🔍 CV Matcher", "✉️ Cover Letter", "🎙️ Interview Prep", "💰 Salary Insight"])
+        
+        # إنزال زر Logout للأسفل
+        for _ in range(10): st.sidebar.write("") 
         if st.button("Logout"):
             st.session_state.entered = False
             st.rerun()
 
     if page == "🔍 CV Matcher":
-        # Header أصغر وأرتب
         st.markdown(f'<div class="tool-header"><h2>{page}</h2><p>Optimize your application by matching your CV with the Job Description.</p></div>', unsafe_allow_html=True)
         
-        # الترتيب الجديد: JD يسار والـ CV يمين
+        # توزيع العناصر: JD يسار والـ CV يمين
         col_left, col_right = st.columns(2)
         
         with col_left:
@@ -114,12 +117,16 @@ else:
         with col_right:
             st.markdown("### 📄 Your CV")
             cv_file = st.file_uploader("Upload Resume (PDF/TXT)", type=["pdf", "txt"])
-            st.markdown("<br>", unsafe_allow_html=True)
-            if st.button("Start Analysis"):
-                if cv_file and jd_text:
-                    st.info("AI Analysis in progress...")
-                else:
-                    st.warning("Please provide both CV and JD.")
+            # إضافة فراغ لموازنة الطول مع الـ Text Area
+            st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
+        
+        # وضع زر التحليل في الأسفل بمنتصف الصفحة
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("Start Analysis"):
+            if cv_file and jd_text:
+                st.info("🚀 AI Analysis in progress...")
+            else:
+                st.warning("⚠️ Please provide both CV and JD.")
 
     else:
         st.markdown(f'<div class="tool-header"><h2>{page}</h2><p>Feature under development.</p></div>', unsafe_allow_html=True)
