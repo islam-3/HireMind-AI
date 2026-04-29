@@ -84,7 +84,7 @@ st.markdown("""
         font-weight: bold !important;
         box-shadow: 0 10px 25px rgba(35, 134, 54, 0.3) !important;
         white-space: nowrap !important;
-        width: 420px !important;
+        width: 220px !important;
     }
     </style>
     """, unsafe_allow_html=True)
