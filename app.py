@@ -8,14 +8,17 @@ except ImportError:
 # --- 1. إعدادات الصفحة ---
 st.set_page_config(page_title="CareerMind AI", layout="wide", initial_sidebar_state="collapsed")
 
-# --- 2. كود الـ CSS الجبري (توسط مليمتر) ---
+# --- 2. كود الـ CSS النهائي (توسيط جبري لكل شيء) ---
 st.markdown("""
     <style>
-    /* تصفير الحاويات وتوسيطها */
+    /* توسيط حاوية Streamlit الأساسية */
     [data-testid="stAppViewBlockContainer"] {
         padding-top: 2rem !important;
-        max-width: 1100px !important;
+        max-width: 1200px !important;
         margin: 0 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
     }
 
     .stApp {
@@ -23,14 +26,11 @@ st.markdown("""
         color: #e6edf3;
     }
 
-    /* حاوية مخصصة تضمن توسط كل ما بداخلها */
-    .hero-section {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
+    /* حاوية العنوان الموسطنة */
+    .hero-container {
         text-align: center;
         width: 100%;
+        margin-bottom: 40px;
     }
 
     .main-title {
@@ -40,16 +40,18 @@ st.markdown("""
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 0px;
+        display: inline-block;
     }
 
     .tagline {
         color: #8b949e;
         letter-spacing: 5px;
         text-transform: uppercase;
-        margin-bottom: 40px;
+        width: 100%;
+        text-align: center;
     }
 
-    /* شبكة البطاقات */
+    /* شبكة البطاقات الموسطنة */
     .feature-grid {
         display: flex;
         justify-content: center;
@@ -65,12 +67,13 @@ st.markdown("""
         border-radius: 20px;
         padding: 30px 15px;
         width: 220px;
+        text-align: center;
     }
 
     .service-card h3 { color: #58a6ff; margin-bottom: 10px; }
     .service-card p { color: #8b949e; font-size: 0.8rem; }
 
-    /* --- التوسيط المطلق للزر بدون أعمدة --- */
+    /* --- التوسيط المطلق والنهائي للزر --- */
     .stButton {
         display: flex !important;
         justify-content: center !important;
@@ -92,22 +95,21 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. إدارة الجلسة والمفاتيح ---
+# --- 3. حالة الجلسة ---
 if "entered" not in st.session_state:
     st.session_state.entered = False
 
-if "GROQ_API_KEY" not in st.secrets:
-    st.error("Missing API Key in Secrets.")
-    st.stop()
-
-# --- 4. العرض ---
+# --- 4. عرض الواجهة ---
 if not st.session_state.entered:
-    # استخدام حاوية CSS الموحدة
-    st.markdown('<div class="hero-section">', unsafe_allow_html=True)
-    
-    st.markdown('<h1 class="main-title">CareerMind AI</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="tagline">Architecting Your Professional Future</p>', unsafe_allow_html=True)
-    
+    # العنوان والتاجلاين في الوسط تماماً
+    st.markdown("""
+        <div class="hero-container">
+            <h1 class="main-title">CareerMind AI</h1>
+            <p class="tagline">Architecting Your Professional Future</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    # البطاقات موسطنة
     st.markdown("""
         <div class="feature-grid">
             <div class="service-card"><h3>🔍 Audit</h3><p>CV & JD Alignment</p></div>
@@ -117,19 +119,18 @@ if not st.session_state.entered:
         </div>
     """, unsafe_allow_html=True)
 
-    # وضع الزر مباشرة بدون st.columns لضمان التوسط المطلق
+    # الزر موسطن حسابياً بدون استخدام أعمدة لتجنب الميلان
     if st.button("Access Professional Suite"):
         st.session_state.entered = True
         st.rerun()
-        
-    st.markdown('</div>', unsafe_allow_html=True)
 
 else:
+    # الدخول للأدوات
     with st.sidebar:
-        st.markdown("<h2 style='text-align:center; color:#58a6ff;'>🧠 CareerMind</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align:center;'>🧠 CareerMind</h2>", unsafe_allow_html=True)
         page = st.radio("Tools", ["🔍 CV Matcher", "✉️ Cover Letter", "🎙️ Interview Prep", "💰 Salary Insight"])
         if st.button("Logout"):
             st.session_state.entered = False
             st.rerun()
     st.title(page)
-    st.info(f"Connected to Groq Cloud for {page}.")
+    st.info(f"Workspace for {page} is ready.")
