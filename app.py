@@ -5,16 +5,17 @@ except ImportError:
     st.error("Missing 'groq' library.")
     st.stop()
 
-# --- 1. إعدادات الصفحة ---
 st.set_page_config(page_title="CareerMind AI", layout="wide", initial_sidebar_state="collapsed")
 
-# --- 2. كود الـ CSS (النسخة الأصلية للزر الصغير على اليسار) ---
 st.markdown("""
     <style>
     [data-testid="stAppViewBlockContainer"] {
         padding-top: 2rem !important;
         max-width: 1200px !important;
         margin: 0 auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
     }
 
     .stApp {
@@ -64,23 +65,19 @@ st.markdown("""
         text-align: center;
     }
 
-    /* تنسيق الزر الأصلي كما في الصورة (بدون توسيط جبري) */
+    .service-card h3 { color: #58a6ff; margin-bottom: 10px; }
+    .service-card p { color: #8b949e; font-size: 0.8rem; }
+
     div.stButton > button {
-        background: transparent !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        padding: 10px 20px !important;
-        border-radius: 10px !important;
+        background: linear-gradient(135deg, #238636 0%, #2ea043 100%) !important;
+        padding: 12px 0px !important;
+        font-size: 1.2rem !important;
+        border-radius: 50px !important;
         color: white !important;
-        transition: 0.3s;
+        font-weight: bold !important;
+        box-shadow: 0 10px 25px rgba(35, 134, 54, 0.3) !important;
+        border: none !important;
     }
-
-    div.stButton > button:hover {
-        border-color: #3fb950 !important;
-        background: rgba(63, 185, 80, 0.1) !important;
-    }
-
-    /* تنسيق خاص لزر اللوج أوت والأنالايز فقط لتمميزهم عن الواجهة */
-    .internal-tools [data-testid="stSidebar"] { background-color: #0d1117 !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -91,9 +88,7 @@ if "GROQ_API_KEY" not in st.secrets:
     st.error("Missing API Key in Secrets.")
     st.stop()
 
-# --- 4. العرض ---
 if not st.session_state.entered:
-    # الصفحة الأولى (image_38029a.jpg)
     st.markdown("""
         <div class="hero-container">
             <h1 class="main-title">CareerMind AI</h1>
@@ -103,41 +98,25 @@ if not st.session_state.entered:
 
     st.markdown("""
         <div class="feature-grid">
-            <div class="service-card"><h3>🔍 Audit</h3><p style="color: #8b949e; font-size: 0.8rem;">CV & JD Alignment</p></div>
-            <div class="service-card"><h3>✉️ Script</h3><p style="color: #8b949e; font-size: 0.8rem;">Cover Letter Builder</p></div>
-            <div class="service-card"><h3>🎙️ Master</h3><p style="color: #8b949e; font-size: 0.8rem;">Interview Simulator</p></div>
-            <div class="service-card"><h3>💰 Value</h3><p style="color: #8b949e; font-size: 0.8rem;">Salary Estimation</p></div>
+            <div class="service-card"><h3>🔍 Audit</h3><p>CV & JD Alignment</p></div>
+            <div class="service-card"><h3>✉️ Script</h3><p>Cover Letter Builder</p></div>
+            <div class="service-card"><h3>🎙️ Master</h3><p>Interview Simulator</p></div>
+            <div class="service-card"><h3>💰 Value</h3><p>Salary Estimation</p></div>
         </div>
     """, unsafe_allow_html=True)
 
-    # الزر الصغير على اليسار كما في الصورة
-    col1, col2, col3 = st.columns([1.2, 4, 1])
-    with col1:
-        if st.button("Access Professional Suite"):
+    _, col, _ = st.columns([2, 1, 2])
+    with col:
+        if st.button("Access Professional Suite", use_container_width=True):
             st.session_state.entered = True
             st.rerun()
 
 else:
-    # الصفحة الداخلية
     with st.sidebar:
-        st.markdown("<h3 style='text-align:center;'>🧠 CareerMind</h3>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align:center;'>🧠 CareerMind</h2>", unsafe_allow_html=True)
         page = st.radio("Tools", ["🔍 CV Matcher", "✉️ Cover Letter", "🎙️ Interview Prep", "💰 Salary Insight"])
-        
-        for _ in range(15): st.sidebar.write("")
         if st.button("Logout"):
             st.session_state.entered = False
             st.rerun()
-            
     st.title(page)
-    if page == "🔍 CV Matcher":
-        col_jd, col_cv = st.columns(2)
-        with col_jd:
-            st.subheader("📝 Job Description")
-            st.text_area("Paste JD here...", height=250)
-        with col_cv:
-            st.subheader("📄 Your CV")
-            st.file_uploader("Upload CV")
-            
-        st.write("")
-        if st.button("Start Analysis"):
-            st.info("Analyzing...")
+    st.info(f"Workspace for {page} is ready.")
