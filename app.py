@@ -5,13 +5,10 @@ except ImportError:
     st.error("Missing 'groq' library.")
     st.stop()
 
-# --- 1. إعدادات الصفحة ---
 st.set_page_config(page_title="CareerMind AI", layout="wide", initial_sidebar_state="collapsed")
 
-# --- 2. كود الـ CSS النهائي (توسيط جبري لكل شيء) ---
 st.markdown("""
     <style>
-    /* توسيط حاوية Streamlit الأساسية */
     [data-testid="stAppViewBlockContainer"] {
         padding-top: 2rem !important;
         max-width: 1200px !important;
@@ -26,7 +23,6 @@ st.markdown("""
         color: #e6edf3;
     }
 
-    /* حاوية العنوان الموسطنة */
     .hero-container {
         text-align: center;
         width: 100%;
@@ -51,7 +47,6 @@ st.markdown("""
         text-align: center;
     }
 
-    /* شبكة البطاقات الموسطنة */
     .feature-grid {
         display: flex;
         justify-content: center;
@@ -73,13 +68,6 @@ st.markdown("""
     .service-card h3 { color: #58a6ff; margin-bottom: 10px; }
     .service-card p { color: #8b949e; font-size: 0.8rem; }
 
-    /* --- التوسيط المطلق والنهائي للزر --- */
-    .stButton {
-        display: flex !important;
-        justify-content: center !important;
-        width: 100% !important;
-    }
-
     div.stButton > button {
         background: linear-gradient(135deg, #238636 0%, #2ea043 100%) !important;
         padding: 12px 0px !important;
@@ -88,20 +76,15 @@ st.markdown("""
         color: white !important;
         font-weight: bold !important;
         box-shadow: 0 10px 25px rgba(35, 134, 54, 0.3) !important;
-        width: 350px !important;
-        margin: 0 auto !important;
         border: none !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. حالة الجلسة ---
 if "entered" not in st.session_state:
     st.session_state.entered = False
 
-# --- 4. عرض الواجهة ---
 if not st.session_state.entered:
-    # العنوان والتاجلاين في الوسط تماماً
     st.markdown("""
         <div class="hero-container">
             <h1 class="main-title">CareerMind AI</h1>
@@ -109,7 +92,6 @@ if not st.session_state.entered:
         </div>
     """, unsafe_allow_html=True)
 
-    # البطاقات موسطنة
     st.markdown("""
         <div class="feature-grid">
             <div class="service-card"><h3>🔍 Audit</h3><p>CV & JD Alignment</p></div>
@@ -119,13 +101,13 @@ if not st.session_state.entered:
         </div>
     """, unsafe_allow_html=True)
 
-    # الزر موسطن حسابياً بدون استخدام أعمدة لتجنب الميلان
-    if st.button("Access Professional Suite"):
-        st.session_state.entered = True
-        st.rerun()
+    _, col, _ = st.columns([1, 2, 1])
+    with col:
+        if st.button("Access Professional Suite", use_container_width=True):
+            st.session_state.entered = True
+            st.rerun()
 
 else:
-    # الدخول للأدوات
     with st.sidebar:
         st.markdown("<h2 style='text-align:center;'>🧠 CareerMind</h2>", unsafe_allow_html=True)
         page = st.radio("Tools", ["🔍 CV Matcher", "✉️ Cover Letter", "🎙️ Interview Prep", "💰 Salary Insight"])
