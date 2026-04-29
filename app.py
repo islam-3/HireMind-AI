@@ -10,10 +10,6 @@ st.set_page_config(page_title="CareerMind AI", layout="wide", initial_sidebar_st
 st.markdown("""
     <style>
     [data-testid="stAppViewBlockContainer"] {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        text-align: center !important;
         padding-top: 2rem !important;
         max-width: 1100px !important;
         margin: 0 auto !important;
@@ -24,6 +20,14 @@ st.markdown("""
         color: #e6edf3;
     }
 
+    .all-center-container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
     .main-title {
         font-size: 5rem !important;
         font-weight: 900;
@@ -31,6 +35,8 @@ st.markdown("""
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 0px;
+        text-align: center;
+        width: 100%;
     }
 
     .tagline {
@@ -38,6 +44,8 @@ st.markdown("""
         letter-spacing: 5px;
         text-transform: uppercase;
         margin-bottom: 40px;
+        text-align: center;
+        width: 100%;
     }
 
     .feature-grid {
@@ -46,6 +54,7 @@ st.markdown("""
         gap: 20px;
         flex-wrap: wrap;
         margin-bottom: 50px;
+        width: 100%;
     }
 
     .service-card {
@@ -60,6 +69,12 @@ st.markdown("""
     .service-card h3 { color: #58a6ff; margin-bottom: 10px; }
     .service-card p { color: #8b949e; font-size: 0.8rem; }
 
+    /* Center the button column contents */
+    [data-testid="stColumn"] {
+        display: flex !important;
+        justify-content: center !important;
+    }
+
     div.stButton > button {
         background: linear-gradient(135deg, #238636 0%, #2ea043 100%) !important;
         padding: 12px 80px !important;
@@ -68,6 +83,8 @@ st.markdown("""
         color: white !important;
         font-weight: bold !important;
         box-shadow: 0 10px 25px rgba(35, 134, 54, 0.3) !important;
+        white-space: nowrap !important;
+        width: 320px !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -80,19 +97,20 @@ if "GROQ_API_KEY" not in st.secrets:
     st.stop()
 
 if not st.session_state.entered:
-    st.markdown('<h1 class="main-title">CareerMind AI</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="tagline">Architecting Your Professional Future</p>', unsafe_allow_html=True)
-
     st.markdown("""
-        <div class="feature-grid">
-            <div class="service-card"><h3>🔍 Audit</h3><p>CV & JD Alignment</p></div>
-            <div class="service-card"><h3>✉️ Script</h3><p>Cover Letter Builder</p></div>
-            <div class="service-card"><h3>🎙️ Master</h3><p>Interview Simulator</p></div>
-            <div class="service-card"><h3>💰 Value</h3><p>Salary Estimation</p></div>
+        <div class="all-center-container">
+            <h1 class="main-title">CareerMind AI</h1>
+            <p class="tagline">Architecting Your Professional Future</p>
+            <div class="feature-grid">
+                <div class="service-card"><h3>🔍 Audit</h3><p>CV & JD Alignment</p></div>
+                <div class="service-card"><h3>✉️ Script</h3><p>Cover Letter Builder</p></div>
+                <div class="service-card"><h3>🎙️ Master</h3><p>Interview Simulator</p></div>
+                <div class="service-card"><h3>💰 Value</h3><p>Salary Estimation</p></div>
+            </div>
         </div>
     """, unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns([2, 1, 2])
+    col1, col2, col3 = st.columns([1.5, 2, 1.5])
     with col2:
         if st.button("Access Professional Suite"):
             st.session_state.entered = True
