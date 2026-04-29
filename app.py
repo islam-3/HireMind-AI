@@ -25,14 +25,14 @@ st.markdown("""
     }
 
     /* حاوية مخصصة تجبر كل محتواها على التوسط */
-    .all-center-container {
+    /*.all-center-container {
         width: 100%;
         max-width: 1100px;
         display: flex;
         flex-direction: column;
         align-items: center;
         text-align: center;
-    }
+    }*/
 
     .main-title {
         font-size: 5rem !important;
@@ -72,6 +72,8 @@ st.markdown("""
 
     /* إجبار زر Streamlit على التوسط */
     .stButton {
+        display: flex;
+        justify-content: center;
         width: 100%;
     }
 
