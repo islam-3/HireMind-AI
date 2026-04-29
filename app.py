@@ -9,337 +9,298 @@ st.set_page_config(page_title="CareerMind AI", layout="wide", initial_sidebar_st
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=DM+Sans:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Bebas+Neue&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 .stApp {
-    background-color: #080A0F;
-    background-image:
-        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(99,179,237,0.08) 0%, transparent 60%),
-        radial-gradient(ellipse 40% 30% at 80% 80%, rgba(56,189,128,0.05) 0%, transparent 50%);
-    font-family: 'DM Sans', sans-serif;
-    color: #E8E2D9;
-}
-
-[data-testid="stAppViewBlockContainer"] {
-    padding: 0 !important;
-    max-width: 100% !important;
-}
-
-[data-testid="stVerticalBlock"] {
-    gap: 0 !important;
-}
-
-.hero-wrap {
+    background: #0F0F0F;
+    font-family: 'Space Grotesk', sans-serif;
+    color: #F0EDE8;
     min-height: 100vh;
+}
+
+[data-testid="stAppViewBlockContainer"] { padding: 0 !important; max-width: 100% !important; }
+[data-testid="stVerticalBlock"] { gap: 0 !important; }
+
+.page {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px 48px;
+    border-bottom: 1px solid #1E1E1E;
+}
+.topbar-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 3px;
+    color: #F0EDE8;
+}
+.topbar-pill {
+    background: #1A1A1A;
+    border: 1px solid #2A2A2A;
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #888;
+}
+
+/* ── HERO ── */
+.hero {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 60px 40px;
-    position: relative;
+    padding: 60px 48px;
+    gap: 0;
 }
 
-.top-bar {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 28px 48px;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-}
-
-.top-bar-logo {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
+.hero-label {
+    font-size: 10px;
     font-weight: 500;
     letter-spacing: 4px;
     text-transform: uppercase;
-    color: rgba(232,226,217,0.5);
+    color: #FF5C00;
+    margin-bottom: 16px;
 }
 
-.top-bar-tag {
-    font-size: 11px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: rgba(232,226,217,0.3);
-    border: 1px solid rgba(255,255,255,0.08);
-    padding: 6px 16px;
-    border-radius: 20px;
-}
-
-.divider-line {
-    width: 1px;
-    height: 60px;
-    background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.15), transparent);
-    margin: 0 auto 32px;
-}
-
-.eyebrow {
-    font-size: 10px;
-    letter-spacing: 5px;
-    text-transform: uppercase;
-    color: rgba(99,179,237,0.7);
-    margin-bottom: 20px;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
-}
-
-.main-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(56px, 8vw, 96px);
-    font-weight: 300;
-    line-height: 1.0;
-    letter-spacing: -1px;
+.hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(72px, 11vw, 140px);
+    line-height: 0.92;
     text-align: center;
-    margin-bottom: 8px;
-    color: #F5F0E8;
+    letter-spacing: 2px;
+    margin-bottom: 32px;
 }
 
-.main-title span {
-    font-weight: 600;
-    font-style: italic;
-    background: linear-gradient(135deg, #63B3ED 0%, #68D391 100%);
+.hero-title .line1 { color: #F0EDE8; display: block; }
+.hero-title .line2 {
+    display: block;
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 2px #F0EDE8;
+    opacity: 0.25;
+}
+.hero-title .line3 {
+    display: block;
+    background: linear-gradient(90deg, #FF5C00, #FFB800);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
-.tagline {
-    font-size: 13px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: rgba(232,226,217,0.35);
-    text-align: center;
-    margin-bottom: 64px;
-    font-weight: 300;
-}
-
+/* ── CARDS ROW ── */
 .cards-row {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 1px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 2px;
-    overflow: hidden;
+    gap: 0;
     width: 100%;
-    max-width: 920px;
-    margin-bottom: 56px;
+    max-width: 1000px;
+    margin-bottom: 48px;
+    border: 1px solid #222;
+    border-radius: 4px;
+    overflow: hidden;
 }
 
 .card {
-    background: #0D1018;
-    padding: 36px 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    transition: background 0.3s;
+    padding: 28px 24px 24px;
+    border-right: 1px solid #222;
     position: relative;
-    overflow: hidden;
+    transition: background 0.2s;
 }
+.card:last-child { border-right: none; }
+.card:hover { background: #161616; }
 
-.card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(99,179,237,0.4), transparent);
-    opacity: 0;
-    transition: opacity 0.3s;
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
 }
-
-.card:hover { background: #111520; }
-.card:hover::before { opacity: 1; }
-
 .card-num {
     font-size: 10px;
-    letter-spacing: 3px;
-    color: rgba(99,179,237,0.4);
-    font-family: 'DM Sans', sans-serif;
     font-weight: 500;
+    color: #444;
+    letter-spacing: 1px;
 }
-
-.card-icon {
-    font-size: 22px;
-    line-height: 1;
-    margin: 4px 0;
+.card-tag {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 100px;
 }
+.tag-orange { background: rgba(255,92,0,0.12); color: #FF5C00; }
+.tag-yellow { background: rgba(255,184,0,0.12); color: #FFB800; }
+.tag-blue   { background: rgba(88,166,255,0.12); color: #58A6FF; }
+.tag-green  { background: rgba(63,185,80,0.12);  color: #3FB950; }
 
 .card-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 22px;
-    font-weight: 600;
-    color: #F5F0E8;
-    line-height: 1.1;
-}
-
-.card-desc {
-    font-size: 12px;
-    color: rgba(232,226,217,0.35);
-    line-height: 1.6;
-    font-weight: 300;
-}
-
-.btn-wrap {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.cta-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: linear-gradient(135deg, #1a4a2e 0%, #1d5c38 100%);
-    border: 1px solid rgba(104,211,145,0.25);
-    color: #68D391;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 500;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
     letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 16px 44px;
-    border-radius: 1px;
-    cursor: pointer;
-    transition: all 0.3s;
+    color: #F0EDE8;
+    margin-bottom: 6px;
+    line-height: 1;
 }
-
-.cta-btn:hover {
-    background: linear-gradient(135deg, #1d5c38 0%, #21703f 100%);
-    border-color: rgba(104,211,145,0.45);
-    box-shadow: 0 0 30px rgba(104,211,145,0.12);
-}
-
-.cta-arrow {
-    font-size: 14px;
-    transition: transform 0.3s;
-}
-
-.cta-btn:hover .cta-arrow { transform: translateX(4px); }
-
-.sub-note {
+.card-desc {
     font-size: 11px;
-    letter-spacing: 1.5px;
-    color: rgba(232,226,217,0.2);
-    text-transform: uppercase;
+    color: #555;
+    font-weight: 400;
+    line-height: 1.5;
 }
 
-.bottom-bar {
+.card-bar {
     position: absolute;
-    bottom: 0; left: 0; right: 0;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+}
+.bar-orange { background: #FF5C00; }
+.bar-yellow { background: #FFB800; }
+.bar-blue   { background: #58A6FF; }
+.bar-green  { background: #3FB950; }
+
+/* ── BOTTOM BAR ── */
+.bottombar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 48px;
-    border-top: 1px solid rgba(255,255,255,0.04);
+    padding: 18px 48px;
+    border-top: 1px solid #1E1E1E;
 }
-
-.bottom-stat {
-    text-align: center;
+.bottombar-copy {
+    font-size: 10px;
+    color: #333;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
-
-.bottom-stat-num {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 22px;
-    font-weight: 600;
-    color: rgba(232,226,217,0.6);
+.bottombar-stats {
+    display: flex;
+    gap: 32px;
 }
-
-.bottom-stat-label {
-    font-size: 9px;
+.bstat { text-align: center; }
+.bstat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    color: #444;
+    letter-spacing: 1px;
+}
+.bstat-lbl {
+    font-size: 8px;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: rgba(232,226,217,0.2);
-    margin-top: 2px;
+    color: #333;
 }
 
-/* Streamlit button override */
+/* ── STREAMLIT BUTTON ── */
 div.stButton { display: flex; justify-content: center; }
 div.stButton > button {
-    background: linear-gradient(135deg, #1a4a2e 0%, #1d5c38 100%) !important;
-    border: 1px solid rgba(104,211,145,0.25) !important;
-    color: #68D391 !important;
-    font-family: 'DM Sans', sans-serif !important;
-    font-size: 11px !important;
-    font-weight: 500 !important;
+    background: linear-gradient(90deg, #FF5C00, #FFB800) !important;
+    border: none !important;
+    border-radius: 4px !important;
+    color: #0F0F0F !important;
+    font-family: 'Bebas Neue', sans-serif !important;
+    font-size: 18px !important;
     letter-spacing: 3px !important;
-    text-transform: uppercase !important;
-    padding: 16px 56px !important;
-    border-radius: 2px !important;
-    box-shadow: none !important;
-    transition: all 0.3s !important;
+    padding: 14px 64px !important;
+    box-shadow: 0 0 40px rgba(255,92,0,0.25) !important;
+    transition: all 0.2s !important;
 }
 div.stButton > button:hover {
-    background: linear-gradient(135deg, #1d5c38 0%, #21703f 100%) !important;
-    border-color: rgba(104,211,145,0.45) !important;
-    box-shadow: 0 0 30px rgba(104,211,145,0.1) !important;
+    box-shadow: 0 0 60px rgba(255,92,0,0.4) !important;
+    transform: translateY(-1px) !important;
 }
 
-/* Sidebar */
+/* ── SIDEBAR ── */
 [data-testid="stSidebar"] {
-    background: #0A0C12 !important;
-    border-right: 1px solid rgba(255,255,255,0.05) !important;
+    background: #0A0A0A !important;
+    border-right: 1px solid #1E1E1E !important;
 }
-[data-testid="stSidebar"] * { color: #E8E2D9 !important; }
-
-.stRadio label { font-size: 13px !important; letter-spacing: 1px !important; }
 </style>
 """, unsafe_allow_html=True)
 
 if "entered" not in st.session_state:
     st.session_state.entered = False
 
+if "GROQ_API_KEY" not in st.secrets:
+    st.error("Missing API Key in Secrets.")
+    st.stop()
+
 if not st.session_state.entered:
     st.markdown("""
-    <div class="hero-wrap">
+    <div class="page">
 
-        <div class="top-bar">
-            <div class="top-bar-logo">CareerMind</div>
-            <div class="top-bar-tag">AI-Powered Suite</div>
+        <div class="topbar">
+            <div class="topbar-logo">CareerMind</div>
+            <div class="topbar-pill">AI Platform — v2.0</div>
         </div>
 
-        <div class="divider-line"></div>
-        <div class="eyebrow">Professional Intelligence Platform</div>
+        <div class="hero">
+            <div class="hero-label">● Your Career Intelligence Suite</div>
+            <div class="hero-title">
+                <span class="line1">Career</span>
+                <span class="line2">Mind</span>
+                <span class="line3">AI</span>
+            </div>
 
-        <h1 class="main-title">Architect Your<br><span>Career Future</span></h1>
-        <p class="tagline">Precision tools for the modern professional</p>
+            <div class="cards-row">
+                <div class="card">
+                    <div class="card-bar bar-orange"></div>
+                    <div class="card-top">
+                        <span class="card-num">01</span>
+                        <span class="card-tag tag-orange">Audit</span>
+                    </div>
+                    <div class="card-title">CV<br>Match</div>
+                    <div class="card-desc">Deep CV & JD alignment analysis</div>
+                </div>
+                <div class="card">
+                    <div class="card-bar bar-yellow"></div>
+                    <div class="card-top">
+                        <span class="card-num">02</span>
+                        <span class="card-tag tag-yellow">Script</span>
+                    </div>
+                    <div class="card-title">Cover<br>Letter</div>
+                    <div class="card-desc">Bespoke cover letter generation</div>
+                </div>
+                <div class="card">
+                    <div class="card-bar bar-blue"></div>
+                    <div class="card-top">
+                        <span class="card-num">03</span>
+                        <span class="card-tag tag-blue">Master</span>
+                    </div>
+                    <div class="card-title">Interview<br>Prep</div>
+                    <div class="card-desc">Live interview simulation</div>
+                </div>
+                <div class="card">
+                    <div class="card-bar bar-green"></div>
+                    <div class="card-top">
+                        <span class="card-num">04</span>
+                        <span class="card-tag tag-green">Value</span>
+                    </div>
+                    <div class="card-title">Salary<br>Intel</div>
+                    <div class="card-desc">Salary intelligence & benchmarks</div>
+                </div>
+            </div>
 
-        <div class="cards-row">
-            <div class="card">
-                <div class="card-num">01</div>
-                <div class="card-icon">⬡</div>
-                <div class="card-title">Audit</div>
-                <div class="card-desc">CV & JD deep alignment analysis</div>
-            </div>
-            <div class="card">
-                <div class="card-num">02</div>
-                <div class="card-icon">◈</div>
-                <div class="card-title">Script</div>
-                <div class="card-desc">Bespoke cover letter generation</div>
-            </div>
-            <div class="card">
-                <div class="card-num">03</div>
-                <div class="card-icon">◎</div>
-                <div class="card-title">Master</div>
-                <div class="card-desc">Live interview simulation</div>
-            </div>
-            <div class="card">
-                <div class="card-num">04</div>
-                <div class="card-icon">◆</div>
-                <div class="card-title">Value</div>
-                <div class="card-desc">Salary intelligence & benchmarks</div>
-            </div>
         </div>
 
-        <div style="height:0"></div>
-
-        <div class="bottom-bar">
-            <div class="bottom-stat"><div class="bottom-stat-num">4</div><div class="bottom-stat-label">Core Tools</div></div>
-            <div class="bottom-stat"><div class="bottom-stat-num">AI</div><div class="bottom-stat-label">Powered</div></div>
-            <div class="bottom-stat"><div class="bottom-stat-num">∞</div><div class="bottom-stat-label">Sessions</div></div>
+        <div class="bottombar">
+            <div class="bottombar-copy">© 2025 CareerMind AI</div>
+            <div class="bottombar-stats">
+                <div class="bstat"><div class="bstat-num">4</div><div class="bstat-lbl">Tools</div></div>
+                <div class="bstat"><div class="bstat-num">AI</div><div class="bstat-lbl">Powered</div></div>
+                <div class="bstat"><div class="bstat-num">∞</div><div class="bstat-lbl">Sessions</div></div>
+            </div>
         </div>
 
     </div>
@@ -347,29 +308,29 @@ if not st.session_state.entered:
 
     _, col, _ = st.columns([2, 1, 2])
     with col:
-        if st.button("Enter Suite →", use_container_width=True):
+        if st.button("ACCESS SUITE", use_container_width=True):
             st.session_state.entered = True
             st.rerun()
 
 else:
     with st.sidebar:
         st.markdown("""
-        <div style='padding: 20px 0 10px; text-align:center;'>
-            <div style='font-family: Cormorant Garamond, serif; font-size: 22px; font-weight: 600; color: #F5F0E8;'>CareerMind</div>
-            <div style='font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: rgba(232,226,217,0.3); margin-top:4px;'>AI Suite</div>
+        <div style='padding:24px 0 16px; text-align:center;'>
+            <div style='font-family:Bebas Neue,sans-serif; font-size:26px; letter-spacing:3px; color:#F0EDE8;'>CareerMind</div>
+            <div style='font-size:9px; letter-spacing:3px; text-transform:uppercase; color:#444; margin-top:4px;'>AI Suite</div>
         </div>
         """, unsafe_allow_html=True)
         page = st.radio("", ["🔍 CV Matcher", "✉️ Cover Letter", "🎙️ Interview Prep", "💰 Salary Insight"])
-        st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
         if st.button("← Exit"):
             st.session_state.entered = False
             st.rerun()
 
     st.markdown(f"""
-    <div style='padding: 48px 40px;'>
-        <div style='font-size:10px; letter-spacing:4px; text-transform:uppercase; color:rgba(99,179,237,0.6); margin-bottom:12px; font-family: DM Sans, sans-serif;'>Active Tool</div>
-        <h2 style='font-family: Cormorant Garamond, serif; font-size: 48px; font-weight: 300; color: #F5F0E8; margin-bottom: 8px;'>{page}</h2>
-        <div style='width:40px; height:1px; background: linear-gradient(90deg, rgba(99,179,237,0.5), transparent); margin-bottom:32px;'></div>
+    <div style='padding:48px 48px 0;'>
+        <div style='font-size:10px; letter-spacing:3px; text-transform:uppercase; color:#FF5C00; margin-bottom:8px;'>Active Tool</div>
+        <div style='font-family:Bebas Neue,sans-serif; font-size:56px; letter-spacing:2px; color:#F0EDE8; line-height:1; margin-bottom:12px;'>{page}</div>
+        <div style='width:48px; height:3px; background:linear-gradient(90deg,#FF5C00,#FFB800); margin-bottom:32px;'></div>
     </div>
     """, unsafe_allow_html=True)
     st.info(f"Workspace for {page} is ready.")
