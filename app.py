@@ -40,7 +40,7 @@ st.markdown("""
         background: linear-gradient(90deg, #58a6ff, #3fb950);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        /*margin-bottom: 0px;*/
+        margin-bottom: 0px;
     }
 
     .tagline {
@@ -72,7 +72,7 @@ st.markdown("""
 
     /* إجبار زر Streamlit على التوسط */
     .stButton {
-        display: flex;
+        display: center;
         justify-content: center;
         width: 100%;
     }
