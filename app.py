@@ -103,6 +103,7 @@ if not st.session_state.entered:
     st.markdown('<div class="all-center-container">', unsafe_allow_html=True)
     
     # اسم الموقع في الوسط
+      display: flex;
     st.markdown('<h1 class="main-title">CareerMind AI</h1>', unsafe_allow_html=True)
     st.markdown('<p class="tagline">Architecting Your Professional Future</p>', unsafe_allow_html=True)
     
