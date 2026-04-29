@@ -5,34 +5,24 @@ except ImportError:
     st.error("Missing 'groq' library.")
     st.stop()
 
-# --- 1. إعدادات الصفحة ---
 st.set_page_config(page_title="CareerMind AI", layout="wide", initial_sidebar_state="collapsed")
 
-# --- 2. كود الـ CSS الجبري للتوسيط الكامل ---
 st.markdown("""
     <style>
-    /* إلغاء أي إزاحة يسارية افتراضية من Streamlit */
-    .block-container {
-        padding-top: 2rem !important;
-        max-width: 100% !important;
+    [data-testid="stAppViewBlockContainer"] {
         display: flex !important;
-        justify-content: center !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        padding-top: 2rem !important;
+        max-width: 1100px !important;
+        margin: 0 auto !important;
     }
-    
+
     .stApp {
         background: radial-gradient(circle at 50% 50%, #1a1f29 0%, #050505 100%);
         color: #e6edf3;
     }
-
-    /* حاوية مخصصة تجبر كل محتواها على التوسط */
-    /*.all-center-container {
-        width: 100%;
-        max-width: 1100px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }*/
 
     .main-title {
         font-size: 5rem !important;
@@ -70,13 +60,6 @@ st.markdown("""
     .service-card h3 { color: #58a6ff; margin-bottom: 10px; }
     .service-card p { color: #8b949e; font-size: 0.8rem; }
 
-    /* إجبار زر Streamlit على التوسط */
-    .stButton {
-        display: flex;
-        justify-content: center;
-        width: 100%;
-    }
-
     div.stButton > button {
         background: linear-gradient(135deg, #238636 0%, #2ea043 100%) !important;
         padding: 12px 80px !important;
@@ -89,7 +72,6 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. إدارة الجلسة والمفاتيح ---
 if "entered" not in st.session_state:
     st.session_state.entered = False
 
@@ -97,16 +79,10 @@ if "GROQ_API_KEY" not in st.secrets:
     st.error("Missing API Key in Secrets.")
     st.stop()
 
-# --- 4. العرض ---
 if not st.session_state.entered:
-    # فتح الحاوية المجمعة لكل شيء
-    st.markdown('<div class="all-center-container">', unsafe_allow_html=True)
-    
-    # اسم الموقع في الوسط
     st.markdown('<h1 class="main-title">CareerMind AI</h1>', unsafe_allow_html=True)
     st.markdown('<p class="tagline">Architecting Your Professional Future</p>', unsafe_allow_html=True)
-    
-    # البطاقات في الوسط
+
     st.markdown("""
         <div class="feature-grid">
             <div class="service-card"><h3>🔍 Audit</h3><p>CV & JD Alignment</p></div>
@@ -115,13 +91,12 @@ if not st.session_state.entered:
             <div class="service-card"><h3>💰 Value</h3><p>Salary Estimation</p></div>
         </div>
     """, unsafe_allow_html=True)
-    
-    # الزر الأخضر في الوسط
-    if st.button("Access Professional Suite"):
-        st.session_state.entered = True
-        st.rerun()
-        
-    st.markdown('</div>', unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([2, 1, 2])
+    with col2:
+        if st.button("Access Professional Suite"):
+            st.session_state.entered = True
+            st.rerun()
 
 else:
     with st.sidebar:
