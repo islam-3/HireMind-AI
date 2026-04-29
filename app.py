@@ -5,17 +5,17 @@ except ImportError:
     st.error("Missing 'groq' library.")
     st.stop()
 
+# --- 1. إعدادات الصفحة ---
 st.set_page_config(page_title="CareerMind AI", layout="wide", initial_sidebar_state="collapsed")
 
+# --- 2. كود الـ CSS (القالب المعتمد + تنسيق الأدوات الداخلية) ---
 st.markdown("""
     <style>
+    /* القالب المقدس للواجهة الأولى */
     [data-testid="stAppViewBlockContainer"] {
         padding-top: 2rem !important;
         max-width: 1200px !important;
         margin: 0 auto !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
     }
 
     .stApp {
@@ -65,9 +65,7 @@ st.markdown("""
         text-align: center;
     }
 
-    .service-card h3 { color: #58a6ff; margin-bottom: 10px; }
-    .service-card p { color: #8b949e; font-size: 0.8rem; }
-
+    /* زر الدخول الرئيسي */
     div.stButton > button {
         background: linear-gradient(135deg, #238636 0%, #2ea043 100%) !important;
         padding: 12px 0px !important;
@@ -78,9 +76,30 @@ st.markdown("""
         box-shadow: 0 10px 25px rgba(35, 134, 54, 0.3) !important;
         border: none !important;
     }
+
+    /* --- تنسيقات الأدوات الداخلية --- */
+    .tool-header {
+        background: rgba(88, 166, 255, 0.05);
+        padding: 20px;
+        border-radius: 15px;
+        border-left: 5px solid #58a6ff;
+        margin-bottom: 30px;
+    }
+    
+    .stTextArea textarea {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        color: white !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+
+    [data-testid="stSidebar"] {
+        background-color: #0d1117 !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
     </style>
     """, unsafe_allow_html=True)
 
+# --- 3. حالة الجلسة ---
 if "entered" not in st.session_state:
     st.session_state.entered = False
 
@@ -88,15 +107,14 @@ if "GROQ_API_KEY" not in st.secrets:
     st.error("Missing API Key in Secrets.")
     st.stop()
 
+# --- 4. عرض الواجهة ---
 if not st.session_state.entered:
+    # الواجهة الأولى (المعتمدة)
     st.markdown("""
         <div class="hero-container">
             <h1 class="main-title">CareerMind AI</h1>
             <p class="tagline">Architecting Your Professional Future</p>
         </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
         <div class="feature-grid">
             <div class="service-card"><h3>🔍 Audit</h3><p>CV & JD Alignment</p></div>
             <div class="service-card"><h3>✉️ Script</h3><p>Cover Letter Builder</p></div>
@@ -112,11 +130,38 @@ if not st.session_state.entered:
             st.rerun()
 
 else:
+    # الواجهة الداخلية (المطورة)
     with st.sidebar:
-        st.markdown("<h2 style='text-align:center;'>🧠 CareerMind</h2>", unsafe_allow_html=True)
-        page = st.radio("Tools", ["🔍 CV Matcher", "✉️ Cover Letter", "🎙️ Interview Prep", "💰 Salary Insight"])
-        if st.button("Logout"):
+        st.markdown("<h2 style='text-align:center; color:#58a6ff;'>🧠 CareerMind</h2>", unsafe_allow_html=True)
+        st.markdown("---")
+        page = st.radio("Executive Tools", ["🔍 CV Matcher", "✉️ Cover Letter", "🎙️ Interview Prep", "💰 Salary Insight"])
+        
+        st.write("") # مساحة
+        if st.button("Logout", use_container_width=True):
             st.session_state.entered = False
             st.rerun()
-    st.title(page)
-    st.info(f"Workspace for {page} is ready.")
+
+    # محتوى الأداة المختارة
+    if page == "🔍 CV Matcher":
+        st.markdown(f'<div class="tool-header"><h1>{page}</h1><p>Analyze how well your CV aligns with a specific Job Description.</p></div>', unsafe_allow_html=True)
+        
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.subheader("Your CV")
+            cv_file = st.file_uploader("Upload Resume (PDF/TXT)", type=["pdf", "txt"])
+        
+        with col_b:
+            st.subheader("Job Description")
+            jd_text = st.text_area("Paste the target JD here...", height=200)
+            
+        if st.button("Start Analysis", use_container_width=True):
+            if cv_file and jd_text:
+                with st.spinner("AI is analyzing alignment..."):
+                    # هنا سنضع لاحقاً كود الاتصال بـ Groq
+                    st.success("Analysis Complete! (Logic to be added)")
+            else:
+                st.warning("Please upload a CV and paste a Job Description first.")
+
+    else:
+        st.markdown(f'<div class="tool-header"><h1>{page}</h1><p>Workspace for {page} is ready.</p></div>', unsafe_allow_html=True)
+        st.info("Feature under development...")
