@@ -101,7 +101,7 @@ if not st.session_state.entered:
         </div>
     """, unsafe_allow_html=True)
 
-    _, col, _ = st.columns([1, 2, 1])
+    _, col, _ = st.columns([2, 1, 2])
     with col:
         if st.button("Access Professional Suite", use_container_width=True):
             st.session_state.entered = True
