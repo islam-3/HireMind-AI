@@ -72,8 +72,6 @@ st.markdown("""
 
     /* إجبار زر Streamlit على التوسط */
     .stButton {
-        display: flex;
-        /*justify-content: center;*/
         width: 100%;
     }
 
