@@ -37,6 +37,7 @@ st.markdown("""
     .main-title {
         font-size: 5rem !important;
         font-weight: 900;
+        display: flex;
         background: linear-gradient(90deg, #58a6ff, #3fb950);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
