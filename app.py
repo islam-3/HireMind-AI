@@ -64,7 +64,7 @@ st.markdown("""
     border-color: rgba(255,100,100,0.35) !important; color: #ff6b6b !important; background: rgba(255,100,100,0.05) !important;
 }
 
-/* ALL MAIN BUTTONS — same height */
+/* ALL MAIN BUTTONS */
 [data-testid="stAppViewBlockContainer"] div.stButton > button {
     padding: 14px 0 !important;
     font-size: 1rem !important;
@@ -72,23 +72,22 @@ st.markdown("""
     border-radius: 50px !important;
     width: 100% !important;
     transition: all 0.2s !important;
-    line-height: 1.2 !important;
     min-height: 52px !important;
 }
 
-/* green buttons */
-[data-testid="stAppViewBlockContainer"] div[data-testid="stButton"]:not(.reset-col) > button {
+/* green action buttons — class .green-btn wraps them */
+.green-btn div.stButton > button {
     background: linear-gradient(135deg, #238636 0%, #2ea043 100%) !important;
     color: white !important;
     border: none !important;
     box-shadow: 0 8px 24px rgba(35,134,54,0.35) !important;
 }
-[data-testid="stAppViewBlockContainer"] div[data-testid="stButton"]:not(.reset-col) > button:hover {
+.green-btn div.stButton > button:hover {
     box-shadow: 0 12px 32px rgba(35,134,54,0.5) !important;
     transform: translateY(-1px) !important;
 }
 
-/* reset buttons wrapper */
+/* reset buttons */
 .reset-col div.stButton > button {
     background: rgba(255,255,255,0.04) !important;
     border: 1px solid rgba(255,255,255,0.12) !important;
@@ -114,10 +113,12 @@ st.markdown("""
 client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
 def call_groq(system_prompt, user_prompt):
+    # truncate inputs to avoid token limit errors
+    user_prompt = user_prompt[:6000]
     response = client.chat.completions.create(
         model="llama3-70b-8192",
         messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
-        temperature=0.7, max_tokens=1500,
+        temperature=0.7, max_tokens=1024,
     )
     return response.choices[0].message.content
 
@@ -131,7 +132,9 @@ def extract_pdf_text(uploaded_file):
 def btn_row(action_label, action_key, reset_keys):
     c1, c2 = st.columns(2)
     with c1:
+        st.markdown('<div class="green-btn">', unsafe_allow_html=True)
         clicked = st.button(action_label, key=f"act_{action_key}", use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
     with c2:
         st.markdown('<div class="reset-col">', unsafe_allow_html=True)
         reset = st.button("↺ Reset", key=f"rst_{action_key}", use_container_width=True)
