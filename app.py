@@ -91,10 +91,11 @@ st.markdown("""
         border: 1px solid rgba(255,255,255,0.1) !important;
         border-radius: 50px !important;
         color: #8b949e !important;
-        font-size: 0.85rem !important;
-        font-weight: 500 !important;
-        padding: 8px 0 !important;
+        font-size: 1.05rem !important;
+        font-weight: 600 !important;
+        padding: 14px 0 !important;
         box-shadow: none !important;
+        width: 100% !important;
     }
     .reset-btn > div.stButton > button:hover {
         border-color: rgba(255,100,100,0.4) !important;
@@ -223,10 +224,10 @@ else:
                 cv_text = st.text_area("Or paste CV text", height=220, placeholder="Paste your CV here...", key="cv_paste", label_visibility="visible")
 
         st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        _, btn_col, reset_col, _ = st.columns([1.5, 1, 1, 1.5])
-        with btn_col:
+        btn_left, btn_right = st.columns(2)
+        with btn_left:
             analyse = st.button("Analyse Match ⚡", use_container_width=True)
-        with reset_col:
+        with btn_right:
             st.markdown('<div class="reset-btn">', unsafe_allow_html=True)
             if st.button("↺ Reset", use_container_width=True, key="reset_cv"):
                 reset_state(["jd_cv", "cv_paste", "cv_pdf", "cv_result"])
@@ -267,10 +268,10 @@ else:
             name = st.text_input("Your Name", placeholder="e.g. Ahmed Al-Rashidi", key="cl_name")
 
         st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        _, btn_col, reset_col, _ = st.columns([1.5, 1, 1, 1.5])
-        with btn_col:
+        btn_left, btn_right = st.columns(2)
+        with btn_left:
             gen_cl = st.button("Generate Cover Letter ✉️", use_container_width=True)
-        with reset_col:
+        with btn_right:
             st.markdown('<div class="reset-btn">', unsafe_allow_html=True)
             if st.button("↺ Reset", use_container_width=True, key="reset_cl"):
                 reset_state(["jd_cl", "cv_cl_paste", "cv_cl_pdf", "cl_name", "cl_result"])
@@ -312,10 +313,10 @@ else:
             st.session_state.iv_question = ""
 
         st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        _, btn_col, reset_col, _ = st.columns([1.5, 1, 1, 1.5])
-        with btn_col:
+        btn_left, btn_right = st.columns(2)
+        with btn_left:
             gen_q = st.button("Generate Question 🎯", use_container_width=True)
-        with reset_col:
+        with btn_right:
             st.markdown('<div class="reset-btn">', unsafe_allow_html=True)
             if st.button("↺ Reset", use_container_width=True, key="reset_iv"):
                 reset_state(["jd_iv", "cv_iv_paste", "cv_iv_pdf", "iv_question", "iv_answer", "iv_feedback"])
@@ -338,10 +339,10 @@ else:
             st.markdown('<div class="col-label">✍️ Your Answer</div>', unsafe_allow_html=True)
             user_answer = st.text_area("", height=180, placeholder="Type your answer here...", key="iv_answer", label_visibility="collapsed")
 
-            _, btn_col2, reset_col2, _ = st.columns([1.5, 1, 1, 1.5])
-            with btn_col2:
+            btn_left2, btn_right2 = st.columns(2)
+            with btn_left2:
                 get_fb = st.button("Get Feedback 💬", use_container_width=True)
-            with reset_col2:
+            with btn_right2:
                 st.markdown('<div class="reset-btn">', unsafe_allow_html=True)
                 if st.button("↺ Reset", use_container_width=True, key="reset_iv2"):
                     reset_state(["iv_question", "iv_answer", "iv_feedback"])
@@ -377,10 +378,10 @@ else:
             skills   = st.text_area("Key Skills", height=120, placeholder="e.g. Python, ML, SQL, AWS...", key="sal_skills")
 
         st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        _, btn_col, reset_col, _ = st.columns([1.5, 1, 1, 1.5])
-        with btn_col:
+        btn_left, btn_right = st.columns(2)
+        with btn_left:
             est_sal = st.button("Estimate Salary 💰", use_container_width=True)
-        with reset_col:
+        with btn_right:
             st.markdown('<div class="reset-btn">', unsafe_allow_html=True)
             if st.button("↺ Reset", use_container_width=True, key="reset_sal"):
                 reset_state(["sal_title", "sal_loc", "sal_exp", "sal_ind", "sal_skills", "sal_result"])
