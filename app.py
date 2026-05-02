@@ -37,6 +37,19 @@ st.markdown("""
 .service-card h3 { color: #58a6ff; margin-bottom: 10px; }
 .service-card p { color: #8b949e; font-size: 0.8rem; }
 
+/* hide card buttons — card div acts as clickable */
+div[data-testid="stColumn"] div.stButton > button[kind="secondary"] {
+    position: absolute !important;
+    inset: 0 !important;
+    opacity: 0 !important;
+    border-radius: 20px !important;
+    cursor: pointer !important;
+    z-index: 10 !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+div[data-testid="stColumn"] { position: relative !important; }
+
 /* SIDEBAR */
 [data-testid="stSidebar"] { background: #0d1117 !important; border-right: 1px solid rgba(255,255,255,0.06) !important; }
 .sidebar-logo { font-size: 1.9rem; font-weight: 900; color: #e6edf3; padding: 24px 0 4px 4px; }
@@ -73,6 +86,20 @@ st.markdown("""
     width: 100% !important;
     transition: all 0.2s !important;
     min-height: 52px !important;
+}
+
+/* card overlay buttons — invisible, cover the card */
+div[data-testid="stColumn"] > div > div[data-testid="stVerticalBlock"] > div:last-child div.stButton > button {
+    position: absolute !important;
+    top: 0 !important; left: 0 !important;
+    width: 100% !important; height: 140px !important;
+    opacity: 0 !important;
+    cursor: pointer !important;
+    border-radius: 20px !important;
+    z-index: 10 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 /* green action buttons — class .green-btn wraps them */
@@ -155,17 +182,34 @@ if not st.session_state.entered:
             <h1 class="main-title">CareerMind AI</h1>
             <p class="tagline">Architecting Your Professional Future</p>
         </div>
-        <div class="feature-grid">
-            <div class="service-card"><h3>🔍 Audit</h3><p>CV & JD Alignment</p></div>
-            <div class="service-card"><h3>✉️ Script</h3><p>Cover Letter Builder</p></div>
-            <div class="service-card"><h3>🎙️ Master</h3><p>Interview Simulator</p></div>
-            <div class="service-card"><h3>💰 Value</h3><p>Salary Estimation</p></div>
-            <div class="service-card"><h3>🎓 Skills</h3><p>Skills & Course Finder</p></div>
-        </div>
     """, unsafe_allow_html=True)
+
+    cards = [
+        ("🔍 Audit",   "CV & JD Alignment",    "🔍 CV Matcher"),
+        ("✉️ Script",  "Cover Letter Builder",  "✉️ Cover Letter"),
+        ("🎙️ Master",  "Interview Simulator",   "🎙️ Interview Prep"),
+        ("💰 Value",   "Salary Estimation",     "💰 Salary Insight"),
+        ("🎓 Skills",  "Skills & Course Finder","🎓 Skills Finder"),
+    ]
+    cols = st.columns(5)
+    for i, (title, desc, page_key) in enumerate(cards):
+        with cols[i]:
+            st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);
+                border-radius:20px;padding:30px 15px;text-align:center;cursor:pointer;">
+                    <h3 style="color:#58a6ff;margin-bottom:10px;">{title}</h3>
+                    <p style="color:#8b949e;font-size:0.8rem;">{desc}</p>
+                </div>
+            """, unsafe_allow_html=True)
+            if st.button(title, key=f"card_{i}", use_container_width=True):
+                st.session_state.entered = True
+                st.session_state.page = page_key
+                st.rerun()
+
+    st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
     _, col, _ = st.columns([2, 1, 2])
     with col:
-        if st.button("Access Professional Suite", use_container_width=True):
+        if st.button("Access Professional Suite", key="btn_enter", use_container_width=True):
             st.session_state.entered = True
             st.rerun()
 
@@ -178,7 +222,11 @@ else:
             <div class="sidebar-divider"></div>
         """, unsafe_allow_html=True)
         st.markdown('<div class="sidebar-section-title">Navigation</div>', unsafe_allow_html=True)
-        page = st.radio("", ["🔍 CV Matcher","✉️ Cover Letter","🎙️ Interview Prep","💰 Salary Insight","🎓 Skills Finder"], label_visibility="collapsed")
+        default_page = st.session_state.get("page", "🔍 CV Matcher")
+        page_options = ["🔍 CV Matcher","✉️ Cover Letter","🎙️ Interview Prep","💰 Salary Insight","🎓 Skills Finder"]
+        default_idx = page_options.index(default_page) if default_page in page_options else 0
+        page = st.radio("", page_options, index=default_idx, label_visibility="collapsed")
+        st.session_state.page = page
         st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
         st.markdown('<div class="sidebar-section-title">Platform Stats</div>', unsafe_allow_html=True)
         st.markdown("""
