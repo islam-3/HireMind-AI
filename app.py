@@ -1,5 +1,5 @@
 import streamlit as st
-import pypdf
+import PyPDF2
 import io
 
 try:
@@ -110,7 +110,7 @@ def call_groq(system_prompt, user_prompt):
     return response.choices[0].message.content
 
 def extract_pdf_text(uploaded_file):
-    reader = pypdf.PdfReader(io.BytesIO(uploaded_file.read()))
+    reader = PyPDF2.PdfReader(io.BytesIO(uploaded_file.read()))
     text = ""
     for page in reader.pages:
         text += page.extract_text() or ""
