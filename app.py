@@ -114,11 +114,11 @@ client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
 def call_groq(system_prompt, user_prompt):
     # truncate inputs to avoid token limit errors
-    user_prompt = user_prompt[:6000]
+    user_prompt = user_prompt[:4000]
     response = client.chat.completions.create(
-        model="llama3-70b-8192",
+        model="llama-3.3-70b-versatile",
         messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
-        temperature=0.7, max_tokens=1024,
+        temperature=0.7, max_tokens=2048,
     )
     return response.choices[0].message.content
 
