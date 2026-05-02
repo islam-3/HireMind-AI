@@ -25,6 +25,10 @@ st.markdown("""
     color: #e6edf3;
 }
 .hero-container { text-align: center; width: 100%; margin-bottom: 40px; }
+
+/* hide card trigger buttons */
+.hidden-card-btns { display: none !important; }
+.hidden-card-btns + div { display: none !important; }
 .main-title {
     font-size: 5rem !important; font-weight: 900;
     background: linear-gradient(90deg, #58a6ff, #3fb950);
@@ -211,7 +215,7 @@ if not st.session_state.entered:
 
     # Hidden real buttons — one per card
     pages = ["🔍 CV Matcher","✉️ Cover Letter","🎙️ Interview Prep","💰 Salary Insight","🎓 Skills Finder"]
-    st.markdown('<div style="display:none">', unsafe_allow_html=True)
+    st.markdown('<div class="hidden-card-btns">', unsafe_allow_html=True)
     for i, p in enumerate(pages):
         if st.button(p, key=f"hcard_{i}"):
             st.session_state.entered = True
