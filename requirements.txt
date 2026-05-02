@@ -1,5 +1,5 @@
 streamlit
-plotly
 groq
 PyPDF2
-pandas
+gspread
+google-auth
