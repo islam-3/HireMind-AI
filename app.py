@@ -30,21 +30,27 @@ def hash_password(password):
 
 def register_user(username, email, password):
     sheet = get_sheet()
-    records = sheet.get_all_records()
-    for r in records:
-        if r["email"] == email:
-            return False, "Email مسجل مسبقاً"
-        if r["username"] == username:
+    try:
+        rows = sheet.get_all_values()[1:]  # skip header
+    except:
+        rows = []
+    for row in rows:
+        if len(row) >= 3 and row[2].lower() == email.lower():
+            return False, "Email already registered"
+        if len(row) >= 1 and row[0].lower() == username.lower():
             return False, "Username taken, try another"
-    sheet.append_row([username, hash_password(password), email, datetime.now().strftime("%Y-%m-%d %H:%M")])
+    sheet.append_row([username, password, email, datetime.now().strftime("%Y-%m-%d %H:%M")])
     return True, "Account created successfully!"
 
 def login_user(email, password):
     sheet = get_sheet()
-    records = sheet.get_all_records()
-    for r in records:
-        if r["email"] == email and r["password"] == hash_password(password):
-            return True, r["username"]
+    try:
+        rows = sheet.get_all_values()[1:]  # skip header
+    except:
+        rows = []
+    for row in rows:
+        if len(row) >= 3 and row[2].lower() == email.lower() and row[1] == password:
+            return True, row[0]
     return False, "Incorrect email or password"
 
 st.markdown("""
