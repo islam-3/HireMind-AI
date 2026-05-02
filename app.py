@@ -40,8 +40,35 @@ st.markdown("""
     .service-card h3 { color: #58a6ff; margin-bottom: 10px; }
     .service-card p { color: #8b949e; font-size: 0.8rem; }
 
-    /* ── BUTTONS ── */
-    div.stButton > button {
+    /* ── SIDEBAR LOGO ── */
+    [data-testid="stSidebar"] .sidebar-logo {
+        font-size: 1.6rem !important;
+        font-weight: 800 !important;
+        text-align: center;
+        padding: 18px 0 10px;
+        letter-spacing: 1px;
+    }
+
+    /* ── LOGOUT BUTTON ── */
+    [data-testid="stSidebar"] div.stButton > button {
+        background: linear-gradient(135deg, #21262d 0%, #30363d 100%) !important;
+        border: 1px solid rgba(255,255,255,0.12) !important;
+        border-radius: 12px !important;
+        color: #e6edf3 !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        padding: 10px 0 !important;
+        width: 100% !important;
+        box-shadow: none !important;
+        margin-top: 12px !important;
+    }
+    [data-testid="stSidebar"] div.stButton > button:hover {
+        border-color: rgba(255,255,255,0.25) !important;
+        background: rgba(255,255,255,0.08) !important;
+    }
+
+    /* ── MAIN BUTTONS ── */
+    [data-testid="stAppViewBlockContainer"] div.stButton > button {
         background: linear-gradient(135deg, #238636 0%, #2ea043 100%) !important;
         padding: 14px 0px !important;
         font-size: 1.05rem !important;
@@ -53,9 +80,28 @@ st.markdown("""
         width: 100% !important;
         transition: all 0.2s !important;
     }
-    div.stButton > button:hover {
+    [data-testid="stAppViewBlockContainer"] div.stButton > button:hover {
         box-shadow: 0 12px 32px rgba(35,134,54,0.5) !important;
         transform: translateY(-1px) !important;
+    }
+
+    /* ── RESET BUTTON ── */
+    .reset-btn > div.stButton > button {
+        background: rgba(255,255,255,0.04) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-radius: 50px !important;
+        color: #8b949e !important;
+        font-size: 0.85rem !important;
+        font-weight: 500 !important;
+        padding: 8px 0 !important;
+        box-shadow: none !important;
+    }
+    .reset-btn > div.stButton > button:hover {
+        border-color: rgba(255,100,100,0.4) !important;
+        color: #ff6b6b !important;
+        background: rgba(255,100,100,0.05) !important;
+        transform: none !important;
+        box-shadow: none !important;
     }
 
     .page-title { font-size: 2rem; font-weight: 700; color: #58a6ff; margin-bottom: 6px; }
@@ -72,14 +118,13 @@ st.markdown("""
         color: #e6edf3;
     }
     .col-label {
-        font-size: 0.78rem;
+        font-size: 0.75rem;
         font-weight: 600;
         letter-spacing: 2px;
         text-transform: uppercase;
         color: #58a6ff;
         margin-bottom: 6px;
     }
-    /* uploaded file badge */
     .pdf-badge {
         display: inline-flex;
         align-items: center;
@@ -116,6 +161,12 @@ def extract_pdf_text(uploaded_file):
         text += page.extract_text() or ""
     return text.strip()
 
+def reset_state(keys):
+    for k in keys:
+        if k in st.session_state:
+            del st.session_state[k]
+    st.rerun()
+
 if "entered" not in st.session_state:
     st.session_state.entered = False
 
@@ -144,24 +195,23 @@ if not st.session_state.entered:
 # ─── INNER APP ──────────────────────────────────────────────────
 else:
     with st.sidebar:
-        st.markdown("<h2 style='text-align:center;'>🧠 CareerMind</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align:center; font-size:1.6rem; font-weight:800; padding-top:10px;'>🧠 CareerMind</h2>", unsafe_allow_html=True)
+        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
         page = st.radio("Tools", ["🔍 CV Matcher", "✉️ Cover Letter", "🎙️ Interview Prep", "💰 Salary Insight"])
-        if st.button("Logout"):
+        st.markdown("<div style='height:32px'></div>", unsafe_allow_html=True)
+        if st.button("🚪 Logout", use_container_width=True):
             st.session_state.entered = False
             st.rerun()
 
     # ── 1. CV MATCHER ────────────────────────────────────────────
     if page == "🔍 CV Matcher":
         st.markdown('<div class="page-title">🔍 CV Matcher</div>', unsafe_allow_html=True)
-        st.markdown('<div class="page-sub">Paste your Job Description on the left and upload/paste your CV on the right — get a full alignment report.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="page-sub">Paste your Job Description on the left and upload/paste your CV on the right.</div>', unsafe_allow_html=True)
 
-        # JD left | CV right
         col_jd, col_cv = st.columns(2)
-
         with col_jd:
             st.markdown('<div class="col-label">📋 Job Description</div>', unsafe_allow_html=True)
-            jd_text = st.text_area("", height=300, placeholder="Paste the job description here...", key="jd_input", label_visibility="collapsed")
-
+            jd_text = st.text_area("", height=300, placeholder="Paste the job description here...", key="jd_cv", label_visibility="collapsed")
         with col_cv:
             st.markdown('<div class="col-label">📄 Your CV</div>', unsafe_allow_html=True)
             pdf_file = st.file_uploader("Upload CV as PDF", type=["pdf"], key="cv_pdf", label_visibility="collapsed")
@@ -173,20 +223,27 @@ else:
                 cv_text = st.text_area("Or paste CV text", height=220, placeholder="Paste your CV here...", key="cv_paste", label_visibility="visible")
 
         st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        _, btn_col, _ = st.columns([2, 1, 2])
+        _, btn_col, _, reset_col, _ = st.columns([1.8, 1, 0.2, 0.8, 1.8])
         with btn_col:
             analyse = st.button("Analyse Match ⚡", use_container_width=True)
+        with reset_col:
+            st.markdown('<div class="reset-btn">', unsafe_allow_html=True)
+            if st.button("↺ Reset", use_container_width=True, key="reset_cv"):
+                reset_state(["jd_cv", "cv_paste", "cv_pdf", "cv_result"])
+            st.markdown('</div>', unsafe_allow_html=True)
 
         if analyse:
             if cv_text.strip() and jd_text.strip():
                 with st.spinner("Analysing alignment..."):
-                    result = call_groq(
+                    st.session_state.cv_result = call_groq(
                         "You are an expert career coach and ATS specialist. Analyse the match between the CV and the job description. Provide: 1) Match score out of 100, 2) Key strengths, 3) Missing keywords/skills, 4) Recommendations to improve the CV.",
                         f"CV:\n{cv_text}\n\nJob Description:\n{jd_text}"
                     )
-                st.markdown(f'<div class="result-box">{result}</div>', unsafe_allow_html=True)
             else:
                 st.warning("Please provide both your CV and the Job Description.")
+
+        if "cv_result" in st.session_state:
+            st.markdown(f'<div class="result-box">{st.session_state.cv_result}</div>', unsafe_allow_html=True)
 
     # ── 2. COVER LETTER ──────────────────────────────────────────
     elif page == "✉️ Cover Letter":
@@ -207,51 +264,70 @@ else:
                 st.markdown(f'<div class="pdf-badge">✅ {pdf_cl.name} — {len(cv_cl)} chars extracted</div>', unsafe_allow_html=True)
             else:
                 cv_cl = st.text_area("Or paste CV text", height=160, placeholder="Paste your CV or key experience...", key="cv_cl_paste")
-            name = st.text_input("Your Name", placeholder="e.g. Ahmed Al-Rashidi")
+            name = st.text_input("Your Name", placeholder="e.g. Ahmed Al-Rashidi", key="cl_name")
 
         st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        _, btn_col, _ = st.columns([2, 1, 2])
+        _, btn_col, _, reset_col, _ = st.columns([1.8, 1, 0.2, 0.8, 1.8])
         with btn_col:
             gen_cl = st.button("Generate Cover Letter ✉️", use_container_width=True)
+        with reset_col:
+            st.markdown('<div class="reset-btn">', unsafe_allow_html=True)
+            if st.button("↺ Reset", use_container_width=True, key="reset_cl"):
+                reset_state(["jd_cl", "cv_cl_paste", "cv_cl_pdf", "cl_name", "cl_result"])
+            st.markdown('</div>', unsafe_allow_html=True)
 
         if gen_cl:
             if cv_cl.strip() and jd_cl.strip():
                 with st.spinner("Writing your cover letter..."):
-                    result = call_groq(
+                    st.session_state.cl_result = call_groq(
                         f"You are an expert cover letter writer. Write a compelling, tailored cover letter in a {tone} tone. Do not add placeholders — use the actual info provided. Sign off with the candidate's name.",
                         f"Candidate Name: {name}\n\nCV/Experience:\n{cv_cl}\n\nJob Description:\n{jd_cl}"
                     )
-                st.markdown(f'<div class="result-box">{result}</div>', unsafe_allow_html=True)
             else:
                 st.warning("Please fill in your CV and the Job Description.")
+
+        if "cl_result" in st.session_state:
+            st.markdown(f'<div class="result-box">{st.session_state.cl_result}</div>', unsafe_allow_html=True)
 
     # ── 3. INTERVIEW PREP ────────────────────────────────────────
     elif page == "🎙️ Interview Prep":
         st.markdown('<div class="page-title">🎙️ Interview Simulator</div>', unsafe_allow_html=True)
-        st.markdown('<div class="page-sub">Practice real interview questions and get expert feedback on your answers.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="page-sub">Upload your CV and paste the Job Description — get interview questions tailored to your profile.</div>', unsafe_allow_html=True)
 
-        col1, col2 = st.columns([1, 1])
+        col1, col2 = st.columns(2)
         with col1:
             st.markdown('<div class="col-label">📋 Job Description</div>', unsafe_allow_html=True)
-            jd_iv = st.text_area("", height=180, placeholder="Paste the job description...", key="jd_iv", label_visibility="collapsed")
+            jd_iv = st.text_area("", height=260, placeholder="Paste the job description...", key="jd_iv", label_visibility="collapsed")
         with col2:
-            st.markdown('<div class="col-label">⚙️ Settings</div>', unsafe_allow_html=True)
-            q_type = st.selectbox("Question Type", ["Behavioural", "Technical", "Situational", "Mixed"])
+            st.markdown('<div class="col-label">📄 Your CV</div>', unsafe_allow_html=True)
+            pdf_iv = st.file_uploader("Upload CV as PDF", type=["pdf"], key="cv_iv_pdf", label_visibility="collapsed")
+            cv_iv = ""
+            if pdf_iv:
+                cv_iv = extract_pdf_text(pdf_iv)
+                st.markdown(f'<div class="pdf-badge">✅ {pdf_iv.name} — {len(cv_iv)} chars extracted</div>', unsafe_allow_html=True)
+            else:
+                cv_iv = st.text_area("Or paste CV text", height=180, placeholder="Paste your CV here...", key="cv_iv_paste")
 
         if "iv_question" not in st.session_state:
             st.session_state.iv_question = ""
 
         st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        _, btn_col, _ = st.columns([2, 1, 2])
+        _, btn_col, _, reset_col, _ = st.columns([1.8, 1, 0.2, 0.8, 1.8])
         with btn_col:
             gen_q = st.button("Generate Question 🎯", use_container_width=True)
+        with reset_col:
+            st.markdown('<div class="reset-btn">', unsafe_allow_html=True)
+            if st.button("↺ Reset", use_container_width=True, key="reset_iv"):
+                reset_state(["jd_iv", "cv_iv_paste", "cv_iv_pdf", "iv_question", "iv_answer", "iv_feedback"])
+            st.markdown('</div>', unsafe_allow_html=True)
 
         if gen_q:
             if jd_iv.strip():
                 with st.spinner("Generating question..."):
+                    cv_context = f"\n\nCandidate CV:\n{cv_iv}" if cv_iv.strip() else ""
                     st.session_state.iv_question = call_groq(
-                        f"You are a senior hiring manager. Generate one realistic {q_type} interview question based on this job description. Just the question, nothing else.",
-                        f"Job Description:\n{jd_iv}"
+                        "You are a senior hiring manager. Generate one realistic interview question that is specifically tailored to both the job description and the candidate's CV background. The question should probe alignment between the candidate's experience and the job requirements. Just the question, nothing else.",
+                        f"Job Description:\n{jd_iv}{cv_context}"
                     )
             else:
                 st.warning("Please paste the Job Description first.")
@@ -262,20 +338,27 @@ else:
             st.markdown('<div class="col-label">✍️ Your Answer</div>', unsafe_allow_html=True)
             user_answer = st.text_area("", height=180, placeholder="Type your answer here...", key="iv_answer", label_visibility="collapsed")
 
-            _, btn_col2, _ = st.columns([2, 1, 2])
+            _, btn_col2, _, reset_col2, _ = st.columns([1.8, 1, 0.2, 0.8, 1.8])
             with btn_col2:
                 get_fb = st.button("Get Feedback 💬", use_container_width=True)
+            with reset_col2:
+                st.markdown('<div class="reset-btn">', unsafe_allow_html=True)
+                if st.button("↺ Reset", use_container_width=True, key="reset_iv2"):
+                    reset_state(["iv_question", "iv_answer", "iv_feedback"])
+                st.markdown('</div>', unsafe_allow_html=True)
 
             if get_fb:
                 if user_answer.strip():
                     with st.spinner("Evaluating your answer..."):
-                        feedback = call_groq(
+                        st.session_state.iv_feedback = call_groq(
                             "You are an expert interview coach. Evaluate the candidate's answer. Give: 1) Score out of 10, 2) What was strong, 3) What was weak, 4) A suggested improved answer.",
                             f"Question:\n{st.session_state.iv_question}\n\nCandidate's Answer:\n{user_answer}"
                         )
-                    st.markdown(f'<div class="result-box">{feedback}</div>', unsafe_allow_html=True)
                 else:
                     st.warning("Please type your answer first.")
+
+            if "iv_feedback" in st.session_state:
+                st.markdown(f'<div class="result-box">{st.session_state.iv_feedback}</div>', unsafe_allow_html=True)
 
     # ── 4. SALARY INSIGHT ────────────────────────────────────────
     elif page == "💰 Salary Insight":
@@ -285,26 +368,33 @@ else:
         col1, col2 = st.columns(2)
         with col1:
             st.markdown('<div class="col-label">📌 Role Details</div>', unsafe_allow_html=True)
-            job_title  = st.text_input("Job Title", placeholder="e.g. Senior Data Scientist")
-            location   = st.text_input("Location / Market", placeholder="e.g. Dubai, UAE")
-            experience = st.slider("Years of Experience", 0, 25, 3)
+            job_title  = st.text_input("Job Title", placeholder="e.g. Senior Data Scientist", key="sal_title")
+            location   = st.text_input("Location / Market", placeholder="e.g. Dubai, UAE", key="sal_loc")
+            experience = st.slider("Years of Experience", 0, 25, 3, key="sal_exp")
         with col2:
             st.markdown('<div class="col-label">🏭 Context</div>', unsafe_allow_html=True)
-            industry = st.text_input("Industry", placeholder="e.g. FinTech, Healthcare")
-            skills   = st.text_area("Key Skills", height=120, placeholder="e.g. Python, ML, SQL, AWS...")
+            industry = st.text_input("Industry", placeholder="e.g. FinTech, Healthcare", key="sal_ind")
+            skills   = st.text_area("Key Skills", height=120, placeholder="e.g. Python, ML, SQL, AWS...", key="sal_skills")
 
         st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        _, btn_col, _ = st.columns([2, 1, 2])
+        _, btn_col, _, reset_col, _ = st.columns([1.8, 1, 0.2, 0.8, 1.8])
         with btn_col:
             est_sal = st.button("Estimate Salary 💰", use_container_width=True)
+        with reset_col:
+            st.markdown('<div class="reset-btn">', unsafe_allow_html=True)
+            if st.button("↺ Reset", use_container_width=True, key="reset_sal"):
+                reset_state(["sal_title", "sal_loc", "sal_exp", "sal_ind", "sal_skills", "sal_result"])
+            st.markdown('</div>', unsafe_allow_html=True)
 
         if est_sal:
             if job_title.strip() and location.strip():
                 with st.spinner("Calculating market value..."):
-                    result = call_groq(
+                    st.session_state.sal_result = call_groq(
                         "You are a compensation specialist. Provide: 1) Salary range (low/mid/high) in local currency, 2) Factors affecting the range, 3) Negotiation tips, 4) Benefits to negotiate beyond salary.",
                         f"Job Title: {job_title}\nLocation: {location}\nIndustry: {industry}\nYears of Experience: {experience}\nKey Skills: {skills}"
                     )
-                st.markdown(f'<div class="result-box">{result}</div>', unsafe_allow_html=True)
             else:
                 st.warning("Please enter at least a Job Title and Location.")
+
+        if "sal_result" in st.session_state:
+            st.markdown(f'<div class="result-box">{st.session_state.sal_result}</div>', unsafe_allow_html=True)
