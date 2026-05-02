@@ -192,8 +192,7 @@ if not st.session_state.entered:
     for i, (icon_title, desc, page_key) in enumerate(cards):
         with cols[i]:
             st.markdown('<div class="card-btn">', unsafe_allow_html=True)
-            label = f"{icon_title}
-{desc}"
+            label = icon_title + "\n" + desc
             if st.button(label, key=f"card_{i}", use_container_width=True):
                 st.session_state.entered = True
                 st.session_state.page = page_key
