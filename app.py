@@ -25,57 +25,6 @@ st.markdown("""
     color: #e6edf3;
 }
 .hero-container { text-align: center; width: 100%; margin-bottom: 40px; }
-/* ── SERVICE CARDS ── */
-.scard {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 20px;
-    padding: 28px 14px 24px;
-    text-align: center;
-    position: relative;
-    z-index: 1;
-    pointer-events: none;
-    transition: all 0.2s;
-}
-.scard-title {
-    color: #58a6ff;
-    font-size: 1.05rem;
-    font-weight: 700;
-    margin-bottom: 10px;
-}
-.scard-desc {
-    color: #8b949e;
-    font-size: 0.8rem;
-}
-/* invisible button overlaid on top of the card */
-div[data-testid="stColumn"] div.stButton > button {
-    position: absolute !important;
-    top: 0 !important; left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    min-height: 130px !important;
-    opacity: 0 !important;
-    cursor: pointer !important;
-    z-index: 999 !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-}
-div[data-testid="stColumn"] {
-    position: relative !important;
-}
-div[data-testid="stColumn"]:hover .scard {
-    background: rgba(88,166,255,0.07);
-    border-color: rgba(88,166,255,0.35);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-}
-
-
-
-
-
 .main-title {
     font-size: 5rem !important; font-weight: 900;
     background: linear-gradient(90deg, #58a6ff, #3fb950);
@@ -84,11 +33,9 @@ div[data-testid="stColumn"]:hover .scard {
 }
 .tagline { color: #8b949e; letter-spacing: 5px; text-transform: uppercase; width: 100%; text-align: center; }
 .feature-grid { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 50px; width: 100%; }
-
+.service-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 30px 15px; width: 200px; text-align: center; }
 .service-card h3 { color: #58a6ff; margin-bottom: 10px; }
 .service-card p { color: #8b949e; font-size: 0.8rem; }
-
-
 
 /* SIDEBAR */
 [data-testid="stSidebar"] { background: #0d1117 !important; border-right: 1px solid rgba(255,255,255,0.06) !important; }
@@ -119,40 +66,24 @@ div[data-testid="stColumn"]:hover .scard {
 
 /* ALL MAIN BUTTONS */
 [data-testid="stAppViewBlockContainer"] div.stButton > button {
-    padding: 14px 0 !important;
-    font-size: 1rem !important;
-    font-weight: 600 !important;
-    border-radius: 50px !important;
-    width: 100% !important;
-    transition: all 0.2s !important;
-    min-height: 52px !important;
+    padding: 14px 0 !important; font-size: 1rem !important; font-weight: 600 !important;
+    border-radius: 50px !important; width: 100% !important; transition: all 0.2s !important; min-height: 52px !important;
 }
-
-/* green action buttons — class .green-btn wraps them */
 .green-btn div.stButton > button {
     background: linear-gradient(135deg, #238636 0%, #2ea043 100%) !important;
-    color: white !important;
-    border: none !important;
+    color: white !important; border: none !important;
     box-shadow: 0 8px 24px rgba(35,134,54,0.35) !important;
 }
 .green-btn div.stButton > button:hover {
-    box-shadow: 0 12px 32px rgba(35,134,54,0.5) !important;
-    transform: translateY(-1px) !important;
+    box-shadow: 0 12px 32px rgba(35,134,54,0.5) !important; transform: translateY(-1px) !important;
 }
-
-/* reset buttons */
 .reset-col div.stButton > button {
-    background: rgba(255,255,255,0.04) !important;
-    border: 1px solid rgba(255,255,255,0.12) !important;
-    color: #8b949e !important;
-    box-shadow: none !important;
+    background: rgba(255,255,255,0.04) !important; border: 1px solid rgba(255,255,255,0.12) !important;
+    color: #8b949e !important; box-shadow: none !important;
 }
 .reset-col div.stButton > button:hover {
-    border-color: rgba(255,100,100,0.4) !important;
-    color: #ff6b6b !important;
-    background: rgba(255,100,100,0.05) !important;
-    transform: none !important;
-    box-shadow: none !important;
+    border-color: rgba(255,100,100,0.4) !important; color: #ff6b6b !important;
+    background: rgba(255,100,100,0.05) !important; transform: none !important; box-shadow: none !important;
 }
 
 .page-title { font-size: 2rem; font-weight: 700; color: #58a6ff; margin-bottom: 6px; }
@@ -166,7 +97,6 @@ div[data-testid="stColumn"]:hover .scard {
 client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
 def call_groq(system_prompt, user_prompt):
-    # truncate inputs to avoid token limit errors
     user_prompt = user_prompt[:4000]
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
@@ -208,33 +138,18 @@ if not st.session_state.entered:
             <h1 class="main-title">CareerMind AI</h1>
             <p class="tagline">Architecting Your Professional Future</p>
         </div>
+        <div class="feature-grid">
+            <div class="service-card"><h3>🔍 Audit</h3><p>CV & JD Alignment</p></div>
+            <div class="service-card"><h3>✉️ Script</h3><p>Cover Letter Builder</p></div>
+            <div class="service-card"><h3>🎙️ Master</h3><p>Interview Simulator</p></div>
+            <div class="service-card"><h3>💰 Value</h3><p>Salary Estimation</p></div>
+            <div class="service-card"><h3>🎓 Skills</h3><p>Skills & Course Finder</p></div>
+        </div>
     """, unsafe_allow_html=True)
-
-    cards = [
-        ("🔍", "Audit",  "CV & JD Alignment",     "🔍 CV Matcher"),
-        ("✉️", "Script", "Cover Letter Builder",   "✉️ Cover Letter"),
-        ("🎙️", "Master", "Interview Simulator",    "🎙️ Interview Prep"),
-        ("💰", "Value",  "Salary Estimation",      "💰 Salary Insight"),
-        ("🎓", "Skills", "Skills & Course Finder", "🎓 Skills Finder"),
-    ]
-    cols = st.columns(5, gap="medium")
-    for i, (emoji, title, desc, page_key) in enumerate(cards):
-        with cols[i]:
-            st.markdown(f'''
-            <div class="scard">
-                <div class="scard-title">{emoji} {title}</div>
-                <div class="scard-desc">{desc}</div>
-            </div>''', unsafe_allow_html=True)
-            if st.button("​", key=f"card_{i}", use_container_width=True):
-                st.session_state.entered = True
-                st.session_state.page = page_key
-                st.rerun()
-
-    st.markdown("<div style='height:32px'></div>", unsafe_allow_html=True)
     _, col, _ = st.columns([2, 1, 2])
     with col:
         st.markdown('<div class="green-btn">', unsafe_allow_html=True)
-        if st.button("Access Professional Suite →", key="btn_enter", use_container_width=True):
+        if st.button("Access Professional Suite", use_container_width=True):
             st.session_state.entered = True
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
