@@ -38,6 +38,31 @@ st.markdown("""
 .service-card p { color: #8b949e; font-size: 0.8rem; }
 
 /* SIDEBAR */
+/* user card */
+.user-card {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 4px; margin-bottom: 4px;
+}
+.user-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, #238636, #58a6ff);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; font-weight: 700; color: white; flex-shrink: 0;
+}
+.user-name { font-size: 0.88rem; font-weight: 600; color: #e6edf3; }
+.user-tag  { font-size: 0.68rem; color: #3fb950; letter-spacing: 1px; margin-top: 2px; }
+.user-card-empty {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 4px; margin-bottom: 4px;
+}
+.user-avatar-empty {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: 1px dashed rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; color: #484f58; flex-shrink: 0;
+}
+.user-name-empty { font-size: 0.88rem; font-weight: 600; color: #484f58; }
 [data-testid="stSidebar"] { background: #0d1117 !important; border-right: 1px solid rgba(255,255,255,0.06) !important; }
 .sidebar-logo { font-size: 1.9rem; font-weight: 900; color: #e6edf3; padding: 24px 0 4px 4px; }
 .sidebar-logo span { color: #58a6ff; }
@@ -162,6 +187,49 @@ else:
             <div class="sidebar-tagline">AI Career Suite</div>
             <div class="sidebar-divider"></div>
         """, unsafe_allow_html=True)
+
+        # ── USER PROFILE ──
+        if "username" not in st.session_state:
+            st.session_state.username = ""
+        if "show_name_input" not in st.session_state:
+            st.session_state.show_name_input = False
+
+        if st.session_state.username:
+            initials = "".join([w[0].upper() for w in st.session_state.username.split()[:2]])
+            st.markdown(f"""
+                <div class="user-card">
+                    <div class="user-avatar">{initials}</div>
+                    <div>
+                        <div class="user-name">{st.session_state.username}</div>
+                        <div class="user-tag">Free Plan</div>
+                    </div>
+                </div>
+                <div class="sidebar-divider"></div>
+            """, unsafe_allow_html=True)
+            if st.button("✏️ Change Name", key="change_name", use_container_width=True):
+                st.session_state.show_name_input = True
+                st.rerun()
+        else:
+            st.markdown("""
+                <div class="user-card-empty">
+                    <div class="user-avatar-empty">?</div>
+                    <div>
+                        <div class="user-name-empty">Guest User</div>
+                        <div class="user-tag">Set your name →</div>
+                    </div>
+                </div>
+            """, unsafe_allow_html=True)
+            st.session_state.show_name_input = True
+
+        if st.session_state.show_name_input:
+            new_name = st.text_input("Your Name", placeholder="e.g. Ahmed", key="name_input", label_visibility="collapsed")
+            if st.button("✅ Save", key="save_name", use_container_width=True):
+                if new_name.strip():
+                    st.session_state.username = new_name.strip()
+                    st.session_state.show_name_input = False
+                    st.rerun()
+
+        st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
         st.markdown('<div class="sidebar-section-title">Navigation</div>', unsafe_allow_html=True)
         default_page = st.session_state.get("page", "🔍 CV Matcher")
         page_options = ["🔍 CV Matcher","✉️ Cover Letter","🎙️ Interview Prep","💰 Salary Insight","🎓 Skills Finder"]
