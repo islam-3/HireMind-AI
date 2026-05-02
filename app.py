@@ -34,11 +34,11 @@ def register_user(username, email, password):
     records = sheet.get_all_records()
     for r in records:
         if r["email"] == email:
-            return False, "البريد الإلكتروني مسجل مسبقاً"
+            return False, "Email مسجل مسبقاً"
         if r["username"] == username:
-            return False, "اسم المستخدم محجوز، جرب اسماً آخر"
+            return False, "Username taken, try another"
     sheet.append_row([username, hash_password(password), email, datetime.now().strftime("%Y-%m-%d %H:%M")])
-    return True, "تم التسجيل بنجاح!"
+    return True, "Account created successfully!"
 
 def login_user(email, password):
     sheet = get_sheet()
@@ -46,7 +46,7 @@ def login_user(email, password):
     for r in records:
         if r["email"] == email and r["password"] == hash_password(password):
             return True, r["username"]
-    return False, "البريد أو كلمة المرور غلط"
+    return False, "البريد أو Password غلط"
 
 st.markdown("""
 <style>
@@ -217,15 +217,15 @@ elif not st.session_state.logged_in:
 
     if st.session_state.auth_page == "login":
         st.markdown('<div class="auth-box">', unsafe_allow_html=True)
-        st.markdown('<div class="auth-title">👋 مرحباً بعودتك</div>', unsafe_allow_html=True)
-        st.markdown('<div class="auth-sub">سجّل دخولك للوصول لأدواتك</div>', unsafe_allow_html=True)
-        email    = st.text_input("البريد الإلكتروني", placeholder="you@example.com", key="li_email")
-        password = st.text_input("كلمة المرور", type="password", key="li_pass")
+        st.markdown('<div class="auth-title">👋 Welcome Back</div>', unsafe_allow_html=True)
+        st.markdown('<div class="auth-sub">Sign in to access your tools</div>', unsafe_allow_html=True)
+        email    = st.text_input("Email", placeholder="you@example.com", key="li_email")
+        password = st.text_input("Password", type="password", key="li_pass")
         st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
         st.markdown('<div class="green-btn">', unsafe_allow_html=True)
-        if st.button("تسجيل الدخول", use_container_width=True, key="do_login"):
+        if st.button("Sign In", use_container_width=True, key="do_login"):
             if email and password:
-                with st.spinner("جارٍ التحقق..."):
+                with st.spinner("Verifying..."):
                     ok, result = login_user(email, password)
                 if ok:
                     st.session_state.logged_in = True
@@ -234,33 +234,33 @@ elif not st.session_state.logged_in:
                 else:
                     st.error(result)
             else:
-                st.warning("يرجى تعبئة جميع الحقول")
+                st.warning("Please fill in all fields")
         st.markdown('</div>', unsafe_allow_html=True)
         st.markdown('<div style="height:16px"></div>', unsafe_allow_html=True)
-        st.markdown('<div style="text-align:center;font-size:0.82rem;color:#8b949e;">ما عندك حساب؟</div>', unsafe_allow_html=True)
-        if st.button("أنشئ حساباً جديداً →", key="go_register", use_container_width=True):
+        st.markdown('<div style="text-align:center;font-size:0.82rem;color:#8b949e;">Don't have an account?</div>', unsafe_allow_html=True)
+        if st.button("Create a new account →", key="go_register", use_container_width=True):
             st.session_state.auth_page = "register"
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
     else:
         st.markdown('<div class="auth-box">', unsafe_allow_html=True)
-        st.markdown('<div class="auth-title">✨ حساب جديد</div>', unsafe_allow_html=True)
-        st.markdown('<div class="auth-sub">انضم لـ CareerMind AI مجاناً</div>', unsafe_allow_html=True)
-        username = st.text_input("الاسم", placeholder="Ahmed Al-Rashidi", key="rg_name")
-        email    = st.text_input("البريد الإلكتروني", placeholder="you@example.com", key="rg_email")
-        password = st.text_input("كلمة المرور", type="password", key="rg_pass")
-        password2= st.text_input("تأكيد كلمة المرور", type="password", key="rg_pass2")
+        st.markdown('<div class="auth-title">✨ Create Account</div>', unsafe_allow_html=True)
+        st.markdown('<div class="auth-sub">Join CareerMind AI for free</div>', unsafe_allow_html=True)
+        username = st.text_input("Full Name", placeholder="Ahmed Al-Rashidi", key="rg_name")
+        email    = st.text_input("Email", placeholder="you@example.com", key="rg_email")
+        password = st.text_input("Password", type="password", key="rg_pass")
+        password2= st.text_input("تأكيد Password", type="password", key="rg_pass2")
         st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
         st.markdown('<div class="green-btn">', unsafe_allow_html=True)
-        if st.button("إنشاء الحساب", use_container_width=True, key="do_register"):
+        if st.button("Create Account", use_container_width=True, key="do_register"):
             if username and email and password and password2:
                 if password != password2:
-                    st.error("كلمتا المرور غير متطابقتين")
+                    st.error("Passwords do not match")
                 elif len(password) < 6:
-                    st.error("كلمة المرور يجب أن تكون 6 أحرف على الأقل")
+                    st.error("Password يجب أن تكون 6 أحرف على الأقل")
                 else:
-                    with st.spinner("جارٍ إنشاء الحساب..."):
+                    with st.spinner("جارٍ Create Account..."):
                         ok, msg = register_user(username, email, password)
                     if ok:
                         st.success(msg)
@@ -270,11 +270,11 @@ elif not st.session_state.logged_in:
                     else:
                         st.error(msg)
             else:
-                st.warning("يرجى تعبئة جميع الحقول")
+                st.warning("Please fill in all fields")
         st.markdown('</div>', unsafe_allow_html=True)
         st.markdown('<div style="height:16px"></div>', unsafe_allow_html=True)
-        st.markdown('<div style="text-align:center;font-size:0.82rem;color:#8b949e;">عندك حساب؟</div>', unsafe_allow_html=True)
-        if st.button("سجّل دخولك →", key="go_login", use_container_width=True):
+        st.markdown('<div style="text-align:center;font-size:0.82rem;color:#8b949e;">Already have an account?</div>', unsafe_allow_html=True)
+        if st.button("Sign in →", key="go_login", use_container_width=True):
             st.session_state.auth_page = "login"
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
