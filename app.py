@@ -25,10 +25,40 @@ st.markdown("""
     color: #e6edf3;
 }
 .hero-container { text-align: center; width: 100%; margin-bottom: 40px; }
+/* ── CARDS ── */
+.cards-wrap div.stButton > button {
+    background: rgba(255,255,255,0.03) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-radius: 20px !important;
+    width: 100% !important;
+    height: 160px !important;
+    color: #8b949e !important;
+    font-size: 0.82rem !important;
+    font-weight: 400 !important;
+    box-shadow: none !important;
+    padding: 0 12px !important;
+    transition: all 0.2s !important;
+    white-space: pre-line !important;
+    text-align: center !important;
+    line-height: 2 !important;
+}
+.cards-wrap div.stButton > button:hover {
+    background: rgba(88,166,255,0.06) !important;
+    border-color: rgba(88,166,255,0.35) !important;
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2) !important;
+    color: #e6edf3 !important;
+}
+/* make first line (emoji + title) blue and bigger */
+.cards-wrap div.stButton > button > div:first-child p:first-child,
+.cards-wrap div.stButton > button p:first-child {
+    color: #58a6ff !important;
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+}
 
-/* hide card trigger buttons */
-.hidden-card-btns { display: none !important; }
-.hidden-card-btns + div { display: none !important; }
+
+
 .main-title {
     font-size: 5rem !important; font-weight: 900;
     background: linear-gradient(90deg, #58a6ff, #3fb950);
@@ -37,44 +67,11 @@ st.markdown("""
 }
 .tagline { color: #8b949e; letter-spacing: 5px; text-transform: uppercase; width: 100%; text-align: center; }
 .feature-grid { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 50px; width: 100%; }
-.service-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 30px 15px; width: 200px; text-align: center; cursor: pointer; transition: all 0.2s; }
-.service-card:hover { background: rgba(88,166,255,0.07); border-color: rgba(88,166,255,0.4); transform: translateY(-3px); }
+
 .service-card h3 { color: #58a6ff; margin-bottom: 10px; }
 .service-card p { color: #8b949e; font-size: 0.8rem; }
 
-/* landing card buttons styled as original cards */
-.landing-cards div.stButton > button {
-    background: rgba(255,255,255,0.03) !important;
-    border: 1px solid rgba(255,255,255,0.1) !important;
-    border-radius: 20px !important;
-    width: 100% !important;
-    height: 160px !important;
-    color: #e6edf3 !important;
-    font-size: 0.85rem !important;
-    font-weight: 400 !important;
-    box-shadow: none !important;
-    padding: 20px 12px !important;
-    line-height: 2.2 !important;
-    transition: all 0.2s !important;
-    white-space: normal !important;
-    text-align: center !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-.landing-cards div.stButton > button:hover {
-    background: rgba(88,166,255,0.07) !important;
-    border-color: rgba(88,166,255,0.4) !important;
-    transform: translateY(-3px) !important;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.25) !important;
-}
-.landing-cards div.stButton > button p:first-child {
-    font-size: 1.1rem !important;
-    font-weight: 700 !important;
-    color: #58a6ff !important;
-    margin-bottom: 6px !important;
-}
+
 
 /* SIDEBAR */
 [data-testid="stSidebar"] { background: #0d1117 !important; border-right: 1px solid rgba(255,255,255,0.06) !important; }
@@ -194,36 +191,26 @@ if not st.session_state.entered:
             <h1 class="main-title">CareerMind AI</h1>
             <p class="tagline">Architecting Your Professional Future</p>
         </div>
-        <div class="feature-grid">
-            <div class="service-card" onclick="window.parent.document.querySelectorAll('button[data-testid=\"baseButton-secondary\"]')[0].click()">
-                <h3>🔍 Audit</h3><p>CV & JD Alignment</p>
-            </div>
-            <div class="service-card" onclick="window.parent.document.querySelectorAll('button[data-testid=\"baseButton-secondary\"]')[1].click()">
-                <h3>✉️ Script</h3><p>Cover Letter Builder</p>
-            </div>
-            <div class="service-card" onclick="window.parent.document.querySelectorAll('button[data-testid=\"baseButton-secondary\"]')[2].click()">
-                <h3>🎙️ Master</h3><p>Interview Simulator</p>
-            </div>
-            <div class="service-card" onclick="window.parent.document.querySelectorAll('button[data-testid=\"baseButton-secondary\"]')[3].click()">
-                <h3>💰 Value</h3><p>Salary Estimation</p>
-            </div>
-            <div class="service-card" onclick="window.parent.document.querySelectorAll('button[data-testid=\"baseButton-secondary\"]')[4].click()">
-                <h3>🎓 Skills</h3><p>Skills & Course Finder</p>
-            </div>
-        </div>
     """, unsafe_allow_html=True)
 
-    # Hidden real buttons — one per card
-    pages = ["🔍 CV Matcher","✉️ Cover Letter","🎙️ Interview Prep","💰 Salary Insight","🎓 Skills Finder"]
-    st.markdown('<div class="hidden-card-btns">', unsafe_allow_html=True)
-    for i, p in enumerate(pages):
-        if st.button(p, key=f"hcard_{i}"):
-            st.session_state.entered = True
-            st.session_state.page = p
-            st.rerun()
+    cards = [
+        ("🔍", "Audit",  "CV & JD Alignment",     "🔍 CV Matcher"),
+        ("✉️", "Script", "Cover Letter Builder",   "✉️ Cover Letter"),
+        ("🎙️", "Master", "Interview Simulator",    "🎙️ Interview Prep"),
+        ("💰", "Value",  "Salary Estimation",      "💰 Salary Insight"),
+        ("🎓", "Skills", "Skills & Course Finder", "🎓 Skills Finder"),
+    ]
+    st.markdown('<div class="cards-wrap">', unsafe_allow_html=True)
+    cols = st.columns(5, gap="medium")
+    for i, (emoji, title, desc, page_key) in enumerate(cards):
+        with cols[i]:
+            if st.button(f"{emoji}  {title}\n{desc}", key=f"card_{i}", use_container_width=True):
+                st.session_state.entered = True
+                st.session_state.page = page_key
+                st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("<div style='height:24px'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:32px'></div>", unsafe_allow_html=True)
     _, col, _ = st.columns([2, 1, 2])
     with col:
         st.markdown('<div class="green-btn">', unsafe_allow_html=True)
@@ -231,7 +218,6 @@ if not st.session_state.entered:
             st.session_state.entered = True
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
-
 
 # ── INNER APP ────────────────────────────────────────────────────
 else:
