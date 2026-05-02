@@ -37,35 +37,29 @@ st.markdown("""
 .service-card h3 { color: #58a6ff; margin-bottom: 10px; }
 .service-card p { color: #8b949e; font-size: 0.8rem; }
 
-/* card container is relative so button can overlay */
-div[data-testid="stColumn"] > div {
-    position: relative !important;
-}
-/* hide "Open" button text, make it transparent overlay on card */
-div[data-testid="stColumn"] div.stButton > button {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
+/* landing card buttons styled as cards */
+.landing-cards div.stButton > button {
+    background: rgba(255,255,255,0.03) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 20px !important;
     width: 100% !important;
-    height: 160px !important;
-    opacity: 0 !important;
-    cursor: pointer !important;
-    z-index: 10 !important;
-    background: transparent !important;
-    border: none !important;
+    min-height: 140px !important;
+    color: #e6edf3 !important;
+    font-size: 1rem !important;
+    font-weight: 400 !important;
     box-shadow: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
+    padding: 24px 16px !important;
+    line-height: 1.8 !important;
+    transition: all 0.2s !important;
+    white-space: pre-wrap !important;
+    text-align: center !important;
 }
-/* card hover effect via sibling — CSS only */
-.service-card {
-    transition: border-color 0.2s, background 0.2s, transform 0.2s !important;
-    cursor: pointer !important;
-}
-div[data-testid="stColumn"]:hover .service-card {
-    background: rgba(88,166,255,0.06) !important;
-    border-color: rgba(88,166,255,0.35) !important;
+.landing-cards div.stButton > button:hover {
+    background: rgba(88,166,255,0.07) !important;
+    border-color: rgba(88,166,255,0.4) !important;
     transform: translateY(-3px) !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25) !important;
+    color: #ffffff !important;
 }
 
 /* SIDEBAR */
@@ -189,25 +183,29 @@ if not st.session_state.entered:
     """, unsafe_allow_html=True)
 
     cards = [
-        ("🔍 Audit",  "CV & JD Alignment",     "🔍 CV Matcher"),
-        ("✉️ Script", "Cover Letter Builder",   "✉️ Cover Letter"),
-        ("🎙️ Master", "Interview Simulator",    "🎙️ Interview Prep"),
-        ("💰 Value",  "Salary Estimation",      "💰 Salary Insight"),
-        ("🎓 Skills", "Skills & Course Finder", "🎓 Skills Finder"),
+        ("🔍 Audit",   "CV & JD Alignment",     "🔍 CV Matcher"),
+        ("✉️ Script",  "Cover Letter Builder",   "✉️ Cover Letter"),
+        ("🎙️ Master",  "Interview Simulator",    "🎙️ Interview Prep"),
+        ("💰 Value",   "Salary Estimation",      "💰 Salary Insight"),
+        ("🎓 Skills",  "Skills & Course Finder", "🎓 Skills Finder"),
     ]
-    cols = st.columns(5)
+    st.markdown('<div class="landing-cards">', unsafe_allow_html=True)
+    cols = st.columns(5, gap="small")
     for i, (icon_title, desc, page_key) in enumerate(cards):
         with cols[i]:
-            st.markdown(f"""
-                <div class="service-card" id="card-{i}">
-                    <h3>{icon_title}</h3>
-                    <p>{desc}</p>
-                </div>
-            """, unsafe_allow_html=True)
-            if st.button("Open", key=f"card_{i}", use_container_width=True):
+            btn_label = icon_title + "\n\n" + desc
+            if st.button(btn_label, key=f"card_{i}", use_container_width=True):
                 st.session_state.entered = True
                 st.session_state.page = page_key
                 st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown("<div style='height:24px'></div>", unsafe_allow_html=True)
+    _, col, _ = st.columns([2, 1, 2])
+    with col:
+        if st.button("Access Professional Suite →", key="btn_enter", use_container_width=True):
+            st.session_state.entered = True
+            st.rerun()
 
 # ── INNER APP ────────────────────────────────────────────────────
 else:
