@@ -37,18 +37,29 @@ st.markdown("""
 .service-card h3 { color: #58a6ff; margin-bottom: 10px; }
 .service-card p { color: #8b949e; font-size: 0.8rem; }
 
-/* hide card buttons — card div acts as clickable */
-div[data-testid="stColumn"] div.stButton > button[kind="secondary"] {
-    position: absolute !important;
-    inset: 0 !important;
-    opacity: 0 !important;
+/* clickable card buttons */
+.card-btn div.stButton > button {
+    background: rgba(255,255,255,0.03) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
     border-radius: 20px !important;
-    cursor: pointer !important;
-    z-index: 10 !important;
+    padding: 28px 12px !important;
     width: 100% !important;
-    height: 100% !important;
+    height: auto !important;
+    min-height: 120px !important;
+    color: #e6edf3 !important;
+    font-size: 1rem !important;
+    font-weight: 400 !important;
+    box-shadow: none !important;
+    transition: border-color 0.2s, background 0.2s !important;
+    white-space: pre-line !important;
+    line-height: 1.6 !important;
 }
-div[data-testid="stColumn"] { position: relative !important; }
+.card-btn div.stButton > button:hover {
+    background: rgba(88,166,255,0.06) !important;
+    border-color: rgba(88,166,255,0.35) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important;
+}
 
 /* SIDEBAR */
 [data-testid="stSidebar"] { background: #0d1117 !important; border-right: 1px solid rgba(255,255,255,0.06) !important; }
@@ -86,20 +97,6 @@ div[data-testid="stColumn"] { position: relative !important; }
     width: 100% !important;
     transition: all 0.2s !important;
     min-height: 52px !important;
-}
-
-/* card overlay buttons — invisible, cover the card */
-div[data-testid="stColumn"] > div > div[data-testid="stVerticalBlock"] > div:last-child div.stButton > button {
-    position: absolute !important;
-    top: 0 !important; left: 0 !important;
-    width: 100% !important; height: 140px !important;
-    opacity: 0 !important;
-    cursor: pointer !important;
-    border-radius: 20px !important;
-    z-index: 10 !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
 }
 
 /* green action buttons — class .green-btn wraps them */
@@ -185,33 +182,23 @@ if not st.session_state.entered:
     """, unsafe_allow_html=True)
 
     cards = [
-        ("🔍 Audit",   "CV & JD Alignment",    "🔍 CV Matcher"),
-        ("✉️ Script",  "Cover Letter Builder",  "✉️ Cover Letter"),
-        ("🎙️ Master",  "Interview Simulator",   "🎙️ Interview Prep"),
-        ("💰 Value",   "Salary Estimation",     "💰 Salary Insight"),
-        ("🎓 Skills",  "Skills & Course Finder","🎓 Skills Finder"),
+        ("🔍 Audit",  "CV & JD Alignment",     "🔍 CV Matcher"),
+        ("✉️ Script", "Cover Letter Builder",   "✉️ Cover Letter"),
+        ("🎙️ Master", "Interview Simulator",    "🎙️ Interview Prep"),
+        ("💰 Value",  "Salary Estimation",      "💰 Salary Insight"),
+        ("🎓 Skills", "Skills & Course Finder", "🎓 Skills Finder"),
     ]
     cols = st.columns(5)
-    for i, (title, desc, page_key) in enumerate(cards):
+    for i, (icon_title, desc, page_key) in enumerate(cards):
         with cols[i]:
-            st.markdown(f"""
-                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);
-                border-radius:20px;padding:30px 15px;text-align:center;cursor:pointer;">
-                    <h3 style="color:#58a6ff;margin-bottom:10px;">{title}</h3>
-                    <p style="color:#8b949e;font-size:0.8rem;">{desc}</p>
-                </div>
-            """, unsafe_allow_html=True)
-            if st.button(title, key=f"card_{i}", use_container_width=True):
+            st.markdown('<div class="card-btn">', unsafe_allow_html=True)
+            label = f"{icon_title}
+{desc}"
+            if st.button(label, key=f"card_{i}", use_container_width=True):
                 st.session_state.entered = True
                 st.session_state.page = page_key
                 st.rerun()
-
-    st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-    _, col, _ = st.columns([2, 1, 2])
-    with col:
-        if st.button("Access Professional Suite", key="btn_enter", use_container_width=True):
-            st.session_state.entered = True
-            st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
 # ── INNER APP ────────────────────────────────────────────────────
 else:
