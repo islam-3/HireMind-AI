@@ -1,6 +1,10 @@
 import streamlit as st
 import PyPDF2
 import io
+import hashlib
+import gspread
+from google.oauth2.service_account import Credentials
+from datetime import datetime
 
 try:
     from groq import Groq
@@ -9,6 +13,40 @@ except ImportError:
     st.stop()
 
 st.set_page_config(page_title="CareerMind AI", layout="wide", initial_sidebar_state="collapsed")
+
+# ── GOOGLE SHEETS SETUP ──────────────────────────────────────────
+SHEET_ID = "1Dt4GOPOThY3c1jDJZ1QCCmD96HiM3IdmmQhQazBl5Ds"
+
+@st.cache_resource
+def get_sheet():
+    creds = Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"],
+        scopes=["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    )
+    client = gspread.authorize(creds)
+    return client.open_by_key(SHEET_ID).sheet1
+
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def register_user(username, email, password):
+    sheet = get_sheet()
+    records = sheet.get_all_records()
+    for r in records:
+        if r["email"] == email:
+            return False, "البريد الإلكتروني مسجل مسبقاً"
+        if r["username"] == username:
+            return False, "اسم المستخدم محجوز، جرب اسماً آخر"
+    sheet.append_row([username, hash_password(password), email, datetime.now().strftime("%Y-%m-%d %H:%M")])
+    return True, "تم التسجيل بنجاح!"
+
+def login_user(email, password):
+    sheet = get_sheet()
+    records = sheet.get_all_records()
+    for r in records:
+        if r["email"] == email and r["password"] == hash_password(password):
+            return True, r["username"]
+    return False, "البريد أو كلمة المرور غلط"
 
 st.markdown("""
 <style>
@@ -37,32 +75,20 @@ st.markdown("""
 .service-card h3 { color: #58a6ff; margin-bottom: 10px; }
 .service-card p { color: #8b949e; font-size: 0.8rem; }
 
+/* AUTH PAGE */
+.auth-box {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+}
+.auth-title { font-size: 1.5rem; font-weight: 700; color: #e6edf3; margin-bottom: 6px; text-align: center; }
+.auth-sub { font-size: 0.82rem; color: #8b949e; text-align: center; margin-bottom: 28px; }
+
 /* SIDEBAR */
-/* user card */
-.user-card {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 4px; margin-bottom: 4px;
-}
-.user-avatar {
-    width: 38px; height: 38px; border-radius: 50%;
-    background: linear-gradient(135deg, #238636, #58a6ff);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.85rem; font-weight: 700; color: white; flex-shrink: 0;
-}
-.user-name { font-size: 0.88rem; font-weight: 600; color: #e6edf3; }
-.user-tag  { font-size: 0.68rem; color: #3fb950; letter-spacing: 1px; margin-top: 2px; }
-.user-card-empty {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 4px; margin-bottom: 4px;
-}
-.user-avatar-empty {
-    width: 38px; height: 38px; border-radius: 50%;
-    background: rgba(255,255,255,0.06);
-    border: 1px dashed rgba(255,255,255,0.15);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1rem; color: #484f58; flex-shrink: 0;
-}
-.user-name-empty { font-size: 0.88rem; font-weight: 600; color: #484f58; }
 [data-testid="stSidebar"] { background: #0d1117 !important; border-right: 1px solid rgba(255,255,255,0.06) !important; }
 .sidebar-logo { font-size: 1.9rem; font-weight: 900; color: #e6edf3; padding: 24px 0 4px 4px; }
 .sidebar-logo span { color: #58a6ff; }
@@ -78,6 +104,10 @@ st.markdown("""
 .sidebar-steps { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
 .sidebar-step { display: flex; align-items: center; gap: 10px; font-size: 0.78rem; color: #8b949e; }
 .sidebar-step-num { width: 22px; height: 22px; border-radius: 50%; background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.2); color: #58a6ff; font-size: 0.65rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.user-card { display: flex; align-items: center; gap: 12px; padding: 12px 4px; margin-bottom: 4px; }
+.user-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #238636, #58a6ff); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; color: white; flex-shrink: 0; }
+.user-name { font-size: 0.88rem; font-weight: 600; color: #e6edf3; }
+.user-tag  { font-size: 0.68rem; color: #3fb950; letter-spacing: 1px; margin-top: 2px; }
 
 /* LOGOUT */
 [data-testid="stSidebar"] div.stButton > button {
@@ -89,27 +119,18 @@ st.markdown("""
     border-color: rgba(255,100,100,0.35) !important; color: #ff6b6b !important; background: rgba(255,100,100,0.05) !important;
 }
 
-/* ALL MAIN BUTTONS */
+/* MAIN BUTTONS */
 [data-testid="stAppViewBlockContainer"] div.stButton > button {
     padding: 14px 0 !important; font-size: 1rem !important; font-weight: 600 !important;
     border-radius: 50px !important; width: 100% !important; transition: all 0.2s !important; min-height: 52px !important;
 }
 .green-btn div.stButton > button {
     background: linear-gradient(135deg, #238636 0%, #2ea043 100%) !important;
-    color: white !important; border: none !important;
-    box-shadow: 0 8px 24px rgba(35,134,54,0.35) !important;
+    color: white !important; border: none !important; box-shadow: 0 8px 24px rgba(35,134,54,0.35) !important;
 }
-.green-btn div.stButton > button:hover {
-    box-shadow: 0 12px 32px rgba(35,134,54,0.5) !important; transform: translateY(-1px) !important;
-}
-.reset-col div.stButton > button {
-    background: rgba(255,255,255,0.04) !important; border: 1px solid rgba(255,255,255,0.12) !important;
-    color: #8b949e !important; box-shadow: none !important;
-}
-.reset-col div.stButton > button:hover {
-    border-color: rgba(255,100,100,0.4) !important; color: #ff6b6b !important;
-    background: rgba(255,100,100,0.05) !important; transform: none !important; box-shadow: none !important;
-}
+.green-btn div.stButton > button:hover { box-shadow: 0 12px 32px rgba(35,134,54,0.5) !important; transform: translateY(-1px) !important; }
+.reset-col div.stButton > button { background: rgba(255,255,255,0.04) !important; border: 1px solid rgba(255,255,255,0.12) !important; color: #8b949e !important; box-shadow: none !important; }
+.reset-col div.stButton > button:hover { border-color: rgba(255,100,100,0.4) !important; color: #ff6b6b !important; background: rgba(255,100,100,0.05) !important; transform: none !important; box-shadow: none !important; }
 
 .page-title { font-size: 2rem; font-weight: 700; color: #58a6ff; margin-bottom: 6px; }
 .page-sub   { color: #8b949e; font-size: 0.9rem; margin-bottom: 24px; }
@@ -153,8 +174,11 @@ def btn_row(action_label, action_key, reset_keys):
         st.rerun()
     return clicked
 
-if "entered" not in st.session_state:
-    st.session_state.entered = False
+# ── SESSION STATE ────────────────────────────────────────────────
+if "entered"   not in st.session_state: st.session_state.entered   = False
+if "logged_in" not in st.session_state: st.session_state.logged_in = False
+if "username"  not in st.session_state: st.session_state.username  = ""
+if "auth_page" not in st.session_state: st.session_state.auth_page = "login"
 
 # ── LANDING ──────────────────────────────────────────────────────
 if not st.session_state.entered:
@@ -171,11 +195,87 @@ if not st.session_state.entered:
             <div class="service-card"><h3>🎓 Skills</h3><p>Skills & Course Finder</p></div>
         </div>
     """, unsafe_allow_html=True)
-    _, col, _ = st.columns([2, 1, 2])
-    with col:
+    c1, c2, c3 = st.columns([1.2, 1, 1, 1.2]) if False else st.columns([1, 1.2, 1.2, 1])
+    with c2:
         st.markdown('<div class="green-btn">', unsafe_allow_html=True)
-        if st.button("Access Professional Suite", use_container_width=True):
+        if st.button("🚀 Get Started", use_container_width=True):
             st.session_state.entered = True
+            st.session_state.auth_page = "login"
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+    with c3:
+        st.markdown('<div class="green-btn">', unsafe_allow_html=True)
+        if st.button("📝 Create Account", use_container_width=True):
+            st.session_state.entered = True
+            st.session_state.auth_page = "register"
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+# ── AUTH PAGE ────────────────────────────────────────────────────
+elif not st.session_state.logged_in:
+    st.markdown('<div style="height:40px"></div>', unsafe_allow_html=True)
+
+    if st.session_state.auth_page == "login":
+        st.markdown('<div class="auth-box">', unsafe_allow_html=True)
+        st.markdown('<div class="auth-title">👋 مرحباً بعودتك</div>', unsafe_allow_html=True)
+        st.markdown('<div class="auth-sub">سجّل دخولك للوصول لأدواتك</div>', unsafe_allow_html=True)
+        email    = st.text_input("البريد الإلكتروني", placeholder="you@example.com", key="li_email")
+        password = st.text_input("كلمة المرور", type="password", key="li_pass")
+        st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="green-btn">', unsafe_allow_html=True)
+        if st.button("تسجيل الدخول", use_container_width=True, key="do_login"):
+            if email and password:
+                with st.spinner("جارٍ التحقق..."):
+                    ok, result = login_user(email, password)
+                if ok:
+                    st.session_state.logged_in = True
+                    st.session_state.username  = result
+                    st.rerun()
+                else:
+                    st.error(result)
+            else:
+                st.warning("يرجى تعبئة جميع الحقول")
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('<div style="height:16px"></div>', unsafe_allow_html=True)
+        st.markdown('<div style="text-align:center;font-size:0.82rem;color:#8b949e;">ما عندك حساب؟</div>', unsafe_allow_html=True)
+        if st.button("أنشئ حساباً جديداً →", key="go_register", use_container_width=True):
+            st.session_state.auth_page = "register"
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    else:
+        st.markdown('<div class="auth-box">', unsafe_allow_html=True)
+        st.markdown('<div class="auth-title">✨ حساب جديد</div>', unsafe_allow_html=True)
+        st.markdown('<div class="auth-sub">انضم لـ CareerMind AI مجاناً</div>', unsafe_allow_html=True)
+        username = st.text_input("الاسم", placeholder="Ahmed Al-Rashidi", key="rg_name")
+        email    = st.text_input("البريد الإلكتروني", placeholder="you@example.com", key="rg_email")
+        password = st.text_input("كلمة المرور", type="password", key="rg_pass")
+        password2= st.text_input("تأكيد كلمة المرور", type="password", key="rg_pass2")
+        st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="green-btn">', unsafe_allow_html=True)
+        if st.button("إنشاء الحساب", use_container_width=True, key="do_register"):
+            if username and email and password and password2:
+                if password != password2:
+                    st.error("كلمتا المرور غير متطابقتين")
+                elif len(password) < 6:
+                    st.error("كلمة المرور يجب أن تكون 6 أحرف على الأقل")
+                else:
+                    with st.spinner("جارٍ إنشاء الحساب..."):
+                        ok, msg = register_user(username, email, password)
+                    if ok:
+                        st.success(msg)
+                        st.session_state.logged_in = True
+                        st.session_state.username  = username
+                        st.rerun()
+                    else:
+                        st.error(msg)
+            else:
+                st.warning("يرجى تعبئة جميع الحقول")
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('<div style="height:16px"></div>', unsafe_allow_html=True)
+        st.markdown('<div style="text-align:center;font-size:0.82rem;color:#8b949e;">عندك حساب؟</div>', unsafe_allow_html=True)
+        if st.button("سجّل دخولك →", key="go_login", use_container_width=True):
+            st.session_state.auth_page = "login"
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -188,54 +288,26 @@ else:
             <div class="sidebar-divider"></div>
         """, unsafe_allow_html=True)
 
-        # ── USER PROFILE ──
-        if "username" not in st.session_state:
-            st.session_state.username = ""
-        if "show_name_input" not in st.session_state:
-            st.session_state.show_name_input = False
-
-        if st.session_state.username:
-            initials = "".join([w[0].upper() for w in st.session_state.username.split()[:2]])
-            st.markdown(f"""
-                <div class="user-card">
-                    <div class="user-avatar">{initials}</div>
-                    <div>
-                        <div class="user-name">{st.session_state.username}</div>
-                        <div class="user-tag">Free Plan</div>
-                    </div>
+        # User card
+        initials = "".join([w[0].upper() for w in st.session_state.username.split()[:2]])
+        st.markdown(f"""
+            <div class="user-card">
+                <div class="user-avatar">{initials}</div>
+                <div>
+                    <div class="user-name">{st.session_state.username}</div>
+                    <div class="user-tag">✦ Free Plan</div>
                 </div>
-                <div class="sidebar-divider"></div>
-            """, unsafe_allow_html=True)
-            if st.button("✏️ Change Name", key="change_name", use_container_width=True):
-                st.session_state.show_name_input = True
-                st.rerun()
-        else:
-            st.markdown("""
-                <div class="user-card-empty">
-                    <div class="user-avatar-empty">?</div>
-                    <div>
-                        <div class="user-name-empty">Guest User</div>
-                        <div class="user-tag">Set your name →</div>
-                    </div>
-                </div>
-            """, unsafe_allow_html=True)
-            st.session_state.show_name_input = True
+            </div>
+            <div class="sidebar-divider"></div>
+        """, unsafe_allow_html=True)
 
-        if st.session_state.show_name_input:
-            new_name = st.text_input("Your Name", placeholder="e.g. Ahmed", key="name_input", label_visibility="collapsed")
-            if st.button("✅ Save", key="save_name", use_container_width=True):
-                if new_name.strip():
-                    st.session_state.username = new_name.strip()
-                    st.session_state.show_name_input = False
-                    st.rerun()
-
-        st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
         st.markdown('<div class="sidebar-section-title">Navigation</div>', unsafe_allow_html=True)
         default_page = st.session_state.get("page", "🔍 CV Matcher")
         page_options = ["🔍 CV Matcher","✉️ Cover Letter","🎙️ Interview Prep","💰 Salary Insight","🎓 Skills Finder"]
-        default_idx = page_options.index(default_page) if default_page in page_options else 0
+        default_idx  = page_options.index(default_page) if default_page in page_options else 0
         page = st.radio("", page_options, index=default_idx, label_visibility="collapsed")
         st.session_state.page = page
+
         st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
         st.markdown('<div class="sidebar-section-title">Platform Stats</div>', unsafe_allow_html=True)
         st.markdown("""
@@ -246,6 +318,7 @@ else:
             </div>
         """, unsafe_allow_html=True)
         st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
+
         tips = {
             "🔍 CV Matcher":     ("<b>Tip:</b> Upload your PDF CV for the most accurate ATS match score.", ["Upload or paste your CV","Paste the job description","Click Analyse Match"]),
             "✉️ Cover Letter":   ("<b>Tip:</b> Match the tone to the company culture for best results.", ["Paste the job description","Upload or paste your CV","Generate your letter"]),
@@ -259,8 +332,11 @@ else:
         steps_html = "".join([f'<div class="sidebar-step"><div class="sidebar-step-num">{i+1}</div>{s}</div>' for i,s in enumerate(steps)])
         st.markdown(f'<div class="sidebar-steps">{steps_html}</div>', unsafe_allow_html=True)
         st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
+
         if st.button("🚪 Logout", use_container_width=True):
-            st.session_state.entered = False
+            st.session_state.logged_in = False
+            st.session_state.username  = ""
+            st.session_state.entered   = False
             st.rerun()
 
     # ── 1. CV MATCHER ────────────────────────────────────────────
@@ -284,7 +360,7 @@ else:
             if cv_text.strip() and jd_text.strip():
                 with st.spinner("Analysing alignment..."):
                     st.session_state.cv_result = call_groq(
-                        "You are an expert career coach and ATS specialist. Provide: 1) Match score out of 100, 2) Key strengths, 3) Missing keywords/skills, 4) Recommendations to improve the CV.",
+                        "You are an expert career coach and ATS specialist. Provide: 1) Match score out of 100, 2) Key strengths, 3) Missing keywords/skills, 4) Recommendations.",
                         f"CV:\n{cv_text}\n\nJob Description:\n{jd_text}")
             else:
                 st.warning("Please provide both your CV and the Job Description.")
@@ -309,8 +385,8 @@ else:
                 st.markdown(f'<div class="pdf-badge">✅ {pdf_cl.name} — {len(cv_cl)} chars extracted</div>', unsafe_allow_html=True)
             else:
                 cv_cl = st.text_area("Or paste CV text", height=180, placeholder="Paste your CV or key experience...", key="cv_cl_paste")
-            name = st.text_input("Your Name", placeholder="e.g. Ahmed Al-Rashidi", key="cl_name")
-        if btn_row("Generate Cover Letter ✉️", "cl", ["jd_cl","cv_cl_paste","cl_name","cl_result"]):
+            name = st.text_input("Your Name", value=st.session_state.username, key="cl_name")
+        if btn_row("Generate Cover Letter ✉️", "cl", ["jd_cl","cv_cl_paste","cl_result"]):
             if cv_cl.strip() and jd_cl.strip():
                 with st.spinner("Writing your cover letter..."):
                     st.session_state.cl_result = call_groq(
@@ -338,14 +414,13 @@ else:
                 st.markdown(f'<div class="pdf-badge">✅ {pdf_iv.name} — {len(cv_iv)} chars extracted</div>', unsafe_allow_html=True)
             else:
                 cv_iv = st.text_area("Or paste CV text", height=200, placeholder="Paste your CV here...", key="cv_iv_paste")
-        if "iv_question" not in st.session_state:
-            st.session_state.iv_question = ""
+        if "iv_question" not in st.session_state: st.session_state.iv_question = ""
         if btn_row("Generate Question 🎯", "iv", ["jd_iv","cv_iv_paste","iv_question","iv_feedback"]):
             if jd_iv.strip():
                 with st.spinner("Generating question..."):
                     cv_context = f"\n\nCandidate CV:\n{cv_iv}" if cv_iv.strip() else ""
                     st.session_state.iv_question = call_groq(
-                        "You are a senior hiring manager. Generate one realistic interview question tailored to the job description and candidate CV. Just the question, nothing else.",
+                        "You are a senior hiring manager. Generate one realistic interview question tailored to the job description and candidate CV. Just the question.",
                         f"Job Description:\n{jd_iv}{cv_context}")
             else:
                 st.warning("Please paste the Job Description first.")
@@ -383,7 +458,7 @@ else:
             if job_title.strip() and location.strip():
                 with st.spinner("Calculating market value..."):
                     st.session_state.sal_result = call_groq(
-                        "You are a compensation specialist. Provide: 1) Salary range (low/mid/high) in local currency, 2) Factors affecting the range, 3) Negotiation tips, 4) Benefits to negotiate.",
+                        "You are a compensation specialist. Provide: 1) Salary range (low/mid/high) in local currency, 2) Factors, 3) Negotiation tips, 4) Benefits to negotiate.",
                         f"Job Title: {job_title}\nLocation: {location}\nIndustry: {industry}\nExperience: {experience} years\nSkills: {skills}")
             else:
                 st.warning("Please enter at least a Job Title and Location.")
@@ -411,7 +486,7 @@ else:
                     extra = f"\nIndustry: {sk_industry}" if sk_industry.strip() else ""
                     note  = f"\nFocus: {sk_note}" if sk_note.strip() else ""
                     st.session_state.sk_result = call_groq(
-                        "You are a career advisor. For the given job title and level, list: 1) Core Technical Skills (6 items), 2) Soft Skills (4 items), 3) Tools & Technologies, 4) Top 5 Courses with platform name, 5) 3-step Learning Roadmap, 6) Estimated time to job-ready.",
+                        "You are a career advisor. List: 1) Core Technical Skills (6), 2) Soft Skills (4), 3) Tools & Technologies, 4) Top 5 Courses with platform, 5) 3-step Learning Roadmap, 6) Estimated time to job-ready.",
                         f"Job Title: {sk_title}\nLevel: {sk_level}{extra}{note}")
             else:
                 st.warning("Please enter a job title.")
