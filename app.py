@@ -54,63 +54,36 @@ st.markdown("""
     .sidebar-step { display: flex; align-items: center; gap: 10px; font-size: 0.78rem; color: #8b949e; }
     .sidebar-step-num { width: 22px; height: 22px; border-radius: 50%; background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.2); color: #58a6ff; font-size: 0.65rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
-    /* LOGOUT */
-    [data-testid="stSidebar"] div.stButton > button {
-        background: rgba(255,255,255,0.04) !important; border: 1px solid rgba(255,255,255,0.1) !important;
-        border-radius: 10px !important; color: #8b949e !important; font-size: 0.88rem !important;
-        font-weight: 500 !important; padding: 10px 0 !important; width: 100% !important; box-shadow: none !important;
-    }
-    [data-testid="stSidebar"] div.stButton > button:hover { border-color: rgba(255,100,100,0.35) !important; color: #ff6b6b !important; background: rgba(255,100,100,0.05) !important; }
-
-    /* GREEN BUTTON — landing only */
-    [data-testid="stAppViewBlockContainer"] div.stButton > button {
+    /* BUTTONS STYLING */
+    div.stButton > button {
         background: linear-gradient(135deg, #238636 0%, #2ea043 100%) !important;
-        color: white !important; padding: 13px 0px !important; font-size: 1rem !important;
-        font-weight: 600 !important; border-radius: 50px !important; width: 100% !important;
-        border: none !important; box-shadow: 0 8px 24px rgba(35,134,54,0.35) !important;
+        color: white !important;
+        padding: 10px 0px !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        border-radius: 50px !important;
+        width: 100% !important;
+        border: none !important;
+        box-shadow: 0 8px 24px rgba(35,134,54,0.3) !important;
+        transition: all 0.2s ease;
     }
-
-    /* DUAL BUTTON ROW */
-    .btn-row {
-        display: flex;
-        gap: 12px;
-        width: 100%;
-        margin-top: 16px;
-        margin-bottom: 4px;
-        align-items: stretch;
+    
+    /* Reset Button Style */
+    div.stButton > button[key*="reset"] {
+        background: rgba(255,255,255,0.05) !important;
+        color: #8b949e !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        box-shadow: none !important;
     }
-    .btn-green {
-        flex: 1;
-        padding: 14px 0;
-        font-size: 1rem;
-        font-weight: 600;
-        border-radius: 50px;
-        border: none;
-        background: linear-gradient(135deg, #238636 0%, #2ea043 100%);
-        color: white;
-        cursor: pointer;
-        box-shadow: 0 8px 24px rgba(35,134,54,0.35);
-        transition: all 0.2s;
+    div.stButton > button[key*="reset"]:hover {
+        border-color: rgba(255,100,100,0.4) !important;
+        color: #ff6b6b !important;
     }
-    .btn-green:hover { box-shadow: 0 12px 32px rgba(35,134,54,0.5); transform: translateY(-1px); }
-    .btn-reset {
-        flex: 1;
-        padding: 14px 0;
-        font-size: 1rem;
-        font-weight: 600;
-        border-radius: 50px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: rgba(255,255,255,0.04);
-        color: #8b949e;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    .btn-reset:hover { border-color: rgba(255,100,100,0.4); color: #ff6b6b; background: rgba(255,100,100,0.05); }
 
     /* CONTENT */
-    .page-title { font-size: 2rem; font-weight: 700; color: #58a6ff; margin-bottom: 6px; }
-    .page-sub   { color: #8b949e; font-size: 0.9rem; margin-bottom: 24px; }
-    .result-box { background: rgba(88,166,255,0.05); border: 1px solid rgba(88,166,255,0.15); border-radius: 12px; padding: 20px 24px; margin-top: 20px; white-space: pre-wrap; font-size: 0.92rem; line-height: 1.7; color: #e6edf3; }
+    .page-title { font-size: 2rem; font-weight: 700; color: #58a6ff; margin-bottom: 6px; align-self: flex-start; }
+    .page-sub   { color: #8b949e; font-size: 0.9rem; margin-bottom: 24px; align-self: flex-start; }
+    .result-box { background: rgba(88,166,255,0.05); border: 1px solid rgba(88,166,255,0.15); border-radius: 12px; padding: 20px 24px; margin-top: 20px; white-space: pre-wrap; font-size: 0.92rem; line-height: 1.7; color: #e6edf3; width: 100%; }
     .col-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #58a6ff; margin-bottom: 6px; }
     .pdf-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(63,185,80,0.1); border: 1px solid rgba(63,185,80,0.25); border-radius: 8px; padding: 8px 14px; font-size: 0.82rem; color: #3fb950; margin-bottom: 8px; }
     </style>
@@ -134,26 +107,15 @@ def extract_pdf_text(uploaded_file):
     return text.strip()
 
 def dual_buttons(green_label, action_key, reset_session_keys):
-    """Pure HTML dual button row — always perfectly aligned."""
-    st.markdown(f"""
-    <div class="btn-row">
-        <button class="btn-green" onclick="document.getElementById('hidden_{action_key}').click()">
-            {green_label}
-        </button>
-        <button class="btn-reset" onclick="window.location.href='?reset={action_key}'">
-            ↺ Reset
-        </button>
-    </div>
-    """, unsafe_allow_html=True)
-    # hidden real streamlit button for the green action
-    clicked = st.button(green_label, key=f"hidden_{action_key}", type="primary")
-    st.markdown(f"<style>#hidden_{action_key}, div[data-testid='stButton']:has(#hidden_{action_key}){{display:none!important}}</style>", unsafe_allow_html=True)
-    # handle reset
-    if st.query_params.get("reset") == action_key:
-        for k in reset_session_keys:
-            st.session_state.pop(k, None)
-        st.query_params.clear()
-        st.rerun()
+    """Refactored dual buttons to be perfectly aligned and clean."""
+    col_main, col_reset = st.columns([2, 1])
+    with col_main:
+        clicked = st.button(green_label, key=f"btn_{action_key}")
+    with col_reset:
+        if st.button("↺ Reset", key=f"reset_{action_key}"):
+            for k in reset_session_keys:
+                st.session_state.pop(k, None)
+            st.rerun()
     return clicked
 
 if "entered" not in st.session_state:
@@ -176,7 +138,7 @@ if not st.session_state.entered:
     """, unsafe_allow_html=True)
     _, col, _ = st.columns([2, 1, 2])
     with col:
-        if st.button("Access Professional Suite", use_container_width=True):
+        if st.button("Access Professional Suite", key="access_btn"):
             st.session_state.entered = True
             st.rerun()
 
@@ -213,7 +175,7 @@ else:
         steps_html = "".join([f'<div class="sidebar-step"><div class="sidebar-step-num">{i+1}</div>{s}</div>' for i,s in enumerate(steps)])
         st.markdown(f'<div class="sidebar-steps">{steps_html}</div>', unsafe_allow_html=True)
         st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
-        if st.button("🚪 Logout", use_container_width=True):
+        if st.button("🚪 Logout", key="logout_sidebar"):
             st.session_state.entered = False
             st.rerun()
 
@@ -234,9 +196,10 @@ else:
                 st.markdown(f'<div class="pdf-badge">✅ {pdf_file.name} — {len(cv_text)} chars extracted</div>', unsafe_allow_html=True)
             else:
                 cv_text = st.text_area("Or paste CV text", height=220, placeholder="Paste your CV here...", key="cv_paste")
+        
         analyse = dual_buttons("Analyse Match ⚡", "cv", ["jd_cv","cv_paste","cv_result"])
         if analyse:
-            if cv_text.strip() and jd_text.strip():
+            if (cv_text and cv_text.strip()) and (jd_text and jd_text.strip()):
                 with st.spinner("Analysing alignment..."):
                     st.session_state.cv_result = call_groq(
                         "You are an expert career coach and ATS specialist. Provide: 1) Match score out of 100, 2) Key strengths, 3) Missing keywords/skills, 4) Recommendations.",
@@ -265,9 +228,10 @@ else:
             else:
                 cv_cl = st.text_area("Or paste CV text", height=180, placeholder="Paste your CV or key experience...", key="cv_cl_paste")
             name = st.text_input("Your Name", placeholder="e.g. Ahmed Al-Rashidi", key="cl_name")
+        
         gen_cl = dual_buttons("Generate Cover Letter ✉️", "cl", ["jd_cl","cv_cl_paste","cl_name","cl_result"])
         if gen_cl:
-            if cv_cl.strip() and jd_cl.strip():
+            if (cv_cl and cv_cl.strip()) and (jd_cl and jd_cl.strip()):
                 with st.spinner("Writing your cover letter..."):
                     st.session_state.cl_result = call_groq(
                         f"You are an expert cover letter writer. Write a compelling, tailored cover letter in a {tone} tone. Sign off with the candidate's name.",
@@ -294,18 +258,21 @@ else:
                 st.markdown(f'<div class="pdf-badge">✅ {pdf_iv.name} — {len(cv_iv)} chars extracted</div>', unsafe_allow_html=True)
             else:
                 cv_iv = st.text_area("Or paste CV text", height=200, placeholder="Paste your CV here...", key="cv_iv_paste")
+        
         if "iv_question" not in st.session_state:
             st.session_state.iv_question = ""
+        
         gen_q = dual_buttons("Generate Question 🎯", "iv", ["jd_iv","cv_iv_paste","iv_question","iv_feedback"])
         if gen_q:
-            if jd_iv.strip():
+            if jd_iv and jd_iv.strip():
                 with st.spinner("Generating question..."):
-                    cv_context = f"\n\nCandidate CV:\n{cv_iv}" if cv_iv.strip() else ""
+                    cv_context = f"\n\nCandidate CV:\n{cv_iv}" if (cv_iv and cv_iv.strip()) else ""
                     st.session_state.iv_question = call_groq(
                         "You are a senior hiring manager. Generate one realistic interview question tailored to the job description and candidate's CV. Just the question.",
                         f"Job Description:\n{jd_iv}{cv_context}")
             else:
                 st.warning("Please paste the Job Description first.")
+        
         if st.session_state.iv_question:
             st.markdown(f'<div class="result-box"><b>❓ Question:</b><br>{st.session_state.iv_question}</div>', unsafe_allow_html=True)
             st.markdown('<div class="col-label" style="margin-top:16px">✍️ Your Answer</div>', unsafe_allow_html=True)
@@ -337,9 +304,10 @@ else:
             st.markdown('<div class="col-label">🏭 Context</div>', unsafe_allow_html=True)
             industry = st.text_input("Industry", placeholder="e.g. FinTech, Healthcare", key="sal_ind")
             skills   = st.text_area("Key Skills", height=140, placeholder="e.g. Python, ML, SQL, AWS...", key="sal_skills")
+        
         est_sal = dual_buttons("Estimate Salary 💰", "sal", ["sal_title","sal_loc","sal_ind","sal_skills","sal_result"])
         if est_sal:
-            if job_title.strip() and location.strip():
+            if (job_title and job_title.strip()) and (location and location.strip()):
                 with st.spinner("Calculating market value..."):
                     st.session_state.sal_result = call_groq(
                         "You are a compensation specialist. Provide: 1) Salary range (low/mid/high) in local currency, 2) Factors affecting the range, 3) Negotiation tips, 4) Benefits to negotiate.",
@@ -363,12 +331,13 @@ else:
             st.markdown('<div class="col-label">🌍 Context (Optional)</div>', unsafe_allow_html=True)
             sk_industry = st.text_input("Industry Focus", placeholder="e.g. Finance, Healthcare, Tech...", key="sk_industry")
             sk_note     = st.text_area("Any specific focus?", height=108, placeholder="e.g. I want to focus on cloud skills...", key="sk_note")
+        
         find_skills = dual_buttons("Find Skills & Courses 🎓", "sk", ["sk_title","sk_industry","sk_note","sk_result"])
         if find_skills:
-            if sk_title.strip():
+            if sk_title and sk_title.strip():
                 with st.spinner("Researching skills and courses..."):
-                    extra = f"\nIndustry: {sk_industry}" if sk_industry.strip() else ""
-                    note  = f"\nFocus: {sk_note}" if sk_note.strip() else ""
+                    extra = f"\nIndustry: {sk_industry}" if (sk_industry and sk_industry.strip()) else ""
+                    note  = f"\nFocus: {sk_note}" if (sk_note and sk_note.strip()) else ""
                     st.session_state.sk_result = call_groq(
                         "You are an expert career development advisor. Given a job title and level, provide:\n\n**🔑 Core Technical Skills** (6–8 must-have skills)\n\n**🤝 Soft Skills** (4–5 key soft skills)\n\n**🛠️ Tools & Technologies** (specific tools and platforms)\n\n**📚 Top 5 Courses** (with platform, e.g. 'Machine Learning — Coursera (Andrew Ng)')\n\n**🗺️ Learning Roadmap** (3-step path to job-ready)\n\n**⏱️ Estimated Time to Job-Ready**",
                         f"Job Title: {sk_title}\nLevel: {sk_level}{extra}{note}")
