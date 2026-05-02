@@ -5,70 +5,41 @@ import io
 try:
     from groq import Groq
 except ImportError:
-    st.error("Missing 'groq' library.")
+    st.error("Missing 'groq' library. Please install it using: pip install groq")
     st.stop()
 
+# --- 1. إعدادات الصفحة والتنسيق (CSS) ---
 st.set_page_config(page_title="CareerMind AI", layout="wide", initial_sidebar_state="collapsed")
 
 st.markdown("""
     <style>
+    /* الحاوية الرئيسية */
     [data-testid="stAppViewBlockContainer"] {
         padding-top: 2rem !important;
         max-width: 1200px !important;
         margin: 0 auto !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
     }
     .stApp {
         background: radial-gradient(circle at 50% 50%, #1a1f29 0%, #050505 100%);
         color: #e6edf3;
     }
-    .hero-container { text-align: center; width: 100%; margin-bottom: 40px; }
-    .main-title {
-        font-size: 5rem !important; font-weight: 900;
-        background: linear-gradient(90deg, #58a6ff, #3fb950);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        margin-bottom: 0px; display: inline-block;
-    }
-    .tagline { color: #8b949e; letter-spacing: 5px; text-transform: uppercase; width: 100%; text-align: center; }
-    .feature-grid { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 50px; width: 100%; }
-    .service-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 30px 15px; width: 200px; text-align: center; }
-    .service-card h3 { color: #58a6ff; margin-bottom: 10px; }
-    .service-card p { color: #8b949e; font-size: 0.8rem; }
 
-    /* SIDEBAR */
-    [data-testid="stSidebar"] { background: #0d1117 !important; border-right: 1px solid rgba(255,255,255,0.06) !important; }
-    .sidebar-logo { font-size: 1.9rem; font-weight: 900; color: #e6edf3; padding: 24px 0 4px 4px; letter-spacing: -0.5px; }
-    .sidebar-logo span { color: #58a6ff; }
-    .sidebar-tagline { font-size: 0.7rem; letter-spacing: 3px; text-transform: uppercase; color: #3fb950; padding-left: 4px; margin-bottom: 20px; }
-    .sidebar-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 14px 0; }
-    .sidebar-section-title { font-size: 0.65rem; letter-spacing: 2.5px; text-transform: uppercase; color: #484f58; padding-left: 4px; margin-bottom: 8px; }
-    .sidebar-stat-row { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 14px; }
-    .sidebar-stat { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 10px 6px; text-align: center; }
-    .sidebar-stat-num { font-size: 1.2rem; font-weight: 700; color: #58a6ff; }
-    .sidebar-stat-lbl { font-size: 0.6rem; letter-spacing: 1px; text-transform: uppercase; color: #484f58; margin-top: 2px; }
-    .sidebar-tip { background: rgba(63,185,80,0.06); border: 1px solid rgba(63,185,80,0.15); border-radius: 10px; padding: 12px 14px; font-size: 0.78rem; color: #8b949e; line-height: 1.5; margin-bottom: 14px; }
-    .sidebar-tip b { color: #3fb950; }
-    .sidebar-steps { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
-    .sidebar-step { display: flex; align-items: center; gap: 10px; font-size: 0.78rem; color: #8b949e; }
-    .sidebar-step-num { width: 22px; height: 22px; border-radius: 50%; background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.2); color: #58a6ff; font-size: 0.65rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-
-    /* BUTTONS STYLING */
+    /* إصلاح الأزرار لتكون بعرض كامل وتنسيق فخم (مثل image_a468ba.jpg) */
     div.stButton > button {
         background: linear-gradient(135deg, #238636 0%, #2ea043 100%) !important;
         color: white !important;
-        padding: 10px 0px !important;
-        font-size: 1rem !important;
+        padding: 12px 20px !important;
+        font-size: 1.05rem !important;
         font-weight: 600 !important;
-        border-radius: 50px !important;
-        width: 100% !important;
+        border-radius: 10px !important;
+        width: 100% !important; /* هذا يجعل الزر يمتد بعرض الحقل */
         border: none !important;
-        box-shadow: 0 8px 24px rgba(35,134,54,0.3) !important;
+        box-shadow: 0 4px 15px rgba(35,134,54,0.3) !important;
         transition: all 0.2s ease;
+        margin-top: 10px;
     }
-    
-    /* Reset Button Style */
+
+    /* تخصيص زر الـ Reset حصرياً بنفس الحجم ولكن بلون محايد */
     div.stButton > button[key*="reset"] {
         background: rgba(255,255,255,0.05) !important;
         color: #8b949e !important;
@@ -80,268 +51,187 @@ st.markdown("""
         color: #ff6b6b !important;
     }
 
-    /* CONTENT */
-    .page-title { font-size: 2rem; font-weight: 700; color: #58a6ff; margin-bottom: 6px; align-self: flex-start; }
-    .page-sub   { color: #8b949e; font-size: 0.9rem; margin-bottom: 24px; align-self: flex-start; }
-    .result-box { background: rgba(88,166,255,0.05); border: 1px solid rgba(88,166,255,0.15); border-radius: 12px; padding: 20px 24px; margin-top: 20px; white-space: pre-wrap; font-size: 0.92rem; line-height: 1.7; color: #e6edf3; width: 100%; }
-    .col-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #58a6ff; margin-bottom: 6px; }
-    .pdf-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(63,185,80,0.1); border: 1px solid rgba(63,185,80,0.25); border-radius: 8px; padding: 8px 14px; font-size: 0.82rem; color: #3fb950; margin-bottom: 8px; }
+    /* حذف ومنع ظهور أي أزرار حمراء افتراضية (الزر الغبي) */
+    button[style*="background-color: rgb(255, 75, 75)"], 
+    button[style*="background-color: #ff4b4b"] {
+        display: none !important;
+    }
+
+    /* العناوين والصناديق */
+    .main-title {
+        font-size: 5rem !important; font-weight: 900;
+        background: linear-gradient(90deg, #58a6ff, #3fb950);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        text-align: center;
+    }
+    .tagline { color: #8b949e; letter-spacing: 5px; text-transform: uppercase; text-align: center; margin-bottom: 40px;}
+    .result-box { background: rgba(88,166,255,0.05); border: 1px solid rgba(88,166,255,0.15); border-radius: 12px; padding: 25px; margin-top: 20px; color: #e6edf3; line-height: 1.6; }
+    .col-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #58a6ff; margin-bottom: 8px; }
+    
+    /* Sidebar Styling */
+    [data-testid="stSidebar"] { background: #0d1117 !important; border-right: 1px solid rgba(255,255,255,0.06) !important; }
+    .sidebar-logo { font-size: 1.8rem; font-weight: 900; color: #e6edf3; padding: 20px 10px; }
+    .sidebar-logo span { color: #58a6ff; }
     </style>
     """, unsafe_allow_html=True)
 
+# --- 2. المنطق البرمجي (Helper Functions) ---
 client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
 def call_groq(system_prompt, user_prompt):
     response = client.chat.completions.create(
         model="llama3-70b-8192",
         messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
-        temperature=0.7, max_tokens=1500,
+        temperature=0.7, max_tokens=2000,
     )
     return response.choices[0].message.content
 
 def extract_pdf_text(uploaded_file):
     reader = PyPDF2.PdfReader(io.BytesIO(uploaded_file.read()))
-    text = ""
-    for page in reader.pages:
-        text += page.extract_text() or ""
+    text = "".join([page.extract_text() or "" for page in reader.pages])
     return text.strip()
 
-def dual_buttons(green_label, action_key, reset_session_keys):
-    """Refactored dual buttons to be perfectly aligned and clean."""
-    col_main, col_reset = st.columns([2, 1])
+def render_dual_buttons(label, action_key, session_keys):
+    """ترسم أزرار متناسقة بعرض كامل تحت الخانات"""
+    col_main, col_reset = st.columns([2.5, 1])
     with col_main:
-        clicked = st.button(green_label, key=f"btn_{action_key}")
+        main_btn = st.button(label, key=f"btn_{action_key}")
     with col_reset:
         if st.button("↺ Reset", key=f"reset_{action_key}"):
-            for k in reset_session_keys:
+            for k in session_keys:
                 st.session_state.pop(k, None)
             st.rerun()
-    return clicked
+    return main_btn
 
+# --- 3. إدارة الجلسة (Session State) ---
 if "entered" not in st.session_state:
     st.session_state.entered = False
 
-# ── LANDING ──────────────────────────────────────────────────────
+# --- 4. واجهة المستخدم (UI) ---
+
+# الصفحة الافتتاحية
 if not st.session_state.entered:
-    st.markdown("""
-        <div class="hero-container">
-            <h1 class="main-title">CareerMind AI</h1>
-            <p class="tagline">Architecting Your Professional Future</p>
-        </div>
-        <div class="feature-grid">
-            <div class="service-card"><h3>🔍 Audit</h3><p>CV & JD Alignment</p></div>
-            <div class="service-card"><h3>✉️ Script</h3><p>Cover Letter Builder</p></div>
-            <div class="service-card"><h3>🎙️ Master</h3><p>Interview Simulator</p></div>
-            <div class="service-card"><h3>💰 Value</h3><p>Salary Estimation</p></div>
-            <div class="service-card"><h3>🎓 Skills</h3><p>Skills & Course Finder</p></div>
-        </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div style="padding-top:100px;"><h1 class="main-title">CareerMind AI</h1><p class="tagline">Architecting Your Professional Future</p></div>', unsafe_allow_html=True)
     _, col, _ = st.columns([2, 1, 2])
     with col:
-        if st.button("Access Professional Suite", key="access_btn"):
+        if st.button("Access Professional Suite", key="access_app"):
             st.session_state.entered = True
             st.rerun()
 
-# ── INNER APP ────────────────────────────────────────────────────
+# التطبيق الداخلي
 else:
     with st.sidebar:
-        st.markdown("""
-            <div class="sidebar-logo">🧠 Career<span>Mind</span></div>
-            <div class="sidebar-tagline">AI Career Suite</div>
-            <div class="sidebar-divider"></div>
-        """, unsafe_allow_html=True)
-        st.markdown('<div class="sidebar-section-title">Navigation</div>', unsafe_allow_html=True)
-        page = st.radio("", ["🔍 CV Matcher","✉️ Cover Letter","🎙️ Interview Prep","💰 Salary Insight","🎓 Skills Finder"], label_visibility="collapsed")
-        st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
-        st.markdown('<div class="sidebar-section-title">Platform Stats</div>', unsafe_allow_html=True)
-        st.markdown("""
-            <div class="sidebar-stat-row">
-                <div class="sidebar-stat"><div class="sidebar-stat-num">5</div><div class="sidebar-stat-lbl">Tools</div></div>
-                <div class="sidebar-stat"><div class="sidebar-stat-num">AI</div><div class="sidebar-stat-lbl">Powered</div></div>
-                <div class="sidebar-stat"><div class="sidebar-stat-num">∞</div><div class="sidebar-stat-lbl">Sessions</div></div>
-            </div>
-        """, unsafe_allow_html=True)
-        st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
-        tips = {
-            "🔍 CV Matcher":     ("<b>Tip:</b> Upload your PDF CV for the most accurate ATS match score.", ["Upload or paste your CV","Paste the job description","Click Analyse Match"]),
-            "✉️ Cover Letter":   ("<b>Tip:</b> Match the tone to the company culture for best results.", ["Paste the job description","Upload or paste your CV","Generate your letter"]),
-            "🎙️ Interview Prep": ("<b>Tip:</b> Upload your CV so questions match your actual experience.", ["Upload your CV","Paste the job description","Generate & answer questions"]),
-            "💰 Salary Insight": ("<b>Tip:</b> Be specific with location and industry for accurate benchmarks.", ["Enter job title & location","Add your skills","Get salary estimate"]),
-            "🎓 Skills Finder":  ("<b>Tip:</b> Be specific with the job title to get the most relevant skills.", ["Enter the job title","Click Find Skills","Review skills & courses"]),
-        }
-        tip_text, steps = tips.get(page, ("", []))
-        st.markdown(f'<div class="sidebar-tip">{tip_text}</div>', unsafe_allow_html=True)
-        st.markdown('<div class="sidebar-section-title">How to use</div>', unsafe_allow_html=True)
-        steps_html = "".join([f'<div class="sidebar-step"><div class="sidebar-step-num">{i+1}</div>{s}</div>' for i,s in enumerate(steps)])
-        st.markdown(f'<div class="sidebar-steps">{steps_html}</div>', unsafe_allow_html=True)
-        st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
-        if st.button("🚪 Logout", key="logout_sidebar"):
+        st.markdown('<div class="sidebar-logo">🧠 Career<span>Mind</span></div>', unsafe_allow_html=True)
+        page = st.radio("Navigation", ["🔍 CV Matcher", "✉️ Cover Letter", "🎙️ Interview Prep", "💰 Salary Insight", "🎓 Skills Finder"])
+        st.write("---")
+        if st.button("🚪 Logout", key="logout"):
             st.session_state.entered = False
             st.rerun()
 
-    # ── 1. CV MATCHER ────────────────────────────────────────────
+    # --- 1. CV Matcher ---
     if page == "🔍 CV Matcher":
-        st.markdown('<div class="page-title">🔍 CV Matcher</div>', unsafe_allow_html=True)
-        st.markdown('<div class="page-sub">Paste your Job Description on the left and upload/paste your CV on the right.</div>', unsafe_allow_html=True)
-        col_jd, col_cv = st.columns(2)
-        with col_jd:
+        st.markdown(f"<h1>{page}</h1>", unsafe_allow_html=True)
+        c1, c2 = st.columns(2)
+        with c1:
             st.markdown('<div class="col-label">📋 Job Description</div>', unsafe_allow_html=True)
-            jd_text = st.text_area("", height=300, placeholder="Paste the job description here...", key="jd_cv", label_visibility="collapsed")
-        with col_cv:
+            jd_input = st.text_area("JD", placeholder="Paste Job Description here...", height=300, label_visibility="collapsed", key="jd_cv")
+        with c2:
             st.markdown('<div class="col-label">📄 Your CV</div>', unsafe_allow_html=True)
-            pdf_file = st.file_uploader("Upload CV as PDF", type=["pdf"], key="cv_pdf", label_visibility="collapsed")
-            cv_text = ""
-            if pdf_file:
-                cv_text = extract_pdf_text(pdf_file)
-                st.markdown(f'<div class="pdf-badge">✅ {pdf_file.name} — {len(cv_text)} chars extracted</div>', unsafe_allow_html=True)
-            else:
-                cv_text = st.text_area("Or paste CV text", height=220, placeholder="Paste your CV here...", key="cv_paste")
-        
-        analyse = dual_buttons("Analyse Match ⚡", "cv", ["jd_cv","cv_paste","cv_result"])
-        if analyse:
-            if (cv_text and cv_text.strip()) and (jd_text and jd_text.strip()):
-                with st.spinner("Analysing alignment..."):
-                    st.session_state.cv_result = call_groq(
-                        "You are an expert career coach and ATS specialist. Provide: 1) Match score out of 100, 2) Key strengths, 3) Missing keywords/skills, 4) Recommendations.",
-                        f"CV:\n{cv_text}\n\nJob Description:\n{jd_text}")
-            else:
-                st.warning("Please provide both your CV and the Job Description.")
-        if "cv_result" in st.session_state:
-            st.markdown(f'<div class="result-box">{st.session_state.cv_result}</div>', unsafe_allow_html=True)
+            uploaded_cv = st.file_uploader("Upload PDF CV", type="pdf", label_visibility="collapsed", key="pdf_cv")
+            cv_text = extract_pdf_text(uploaded_cv) if uploaded_cv else st.text_area("CV", placeholder="Or paste CV text...", height=210, label_visibility="collapsed", key="txt_cv")
 
-    # ── 2. COVER LETTER ──────────────────────────────────────────
+        if render_dual_buttons("Analyse Match ⚡", "cv_match", ["jd_cv", "txt_cv", "cv_res"]):
+            if (jd_input and (uploaded_cv or cv_text)):
+                with st.spinner("Calculating ATS Score..."):
+                    st.session_state.cv_res = call_groq("You are an ATS Expert.", f"Match CV: {cv_text or uploaded_cv} with JD: {jd_input}")
+            else: st.warning("Please provide both CV and JD.")
+        
+        if "cv_res" in st.session_state:
+            st.markdown(f'<div class="result-box">{st.session_state.cv_res}</div>', unsafe_allow_html=True)
+
+    # --- 2. Cover Letter ---
     elif page == "✉️ Cover Letter":
-        st.markdown('<div class="page-title">✉️ Cover Letter Builder</div>', unsafe_allow_html=True)
-        st.markdown('<div class="page-sub">Generate a tailored, professional cover letter in seconds.</div>', unsafe_allow_html=True)
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown('<div class="col-label">📋 Job Description</div>', unsafe_allow_html=True)
-            jd_cl = st.text_area("", height=240, placeholder="Paste the job description...", key="jd_cl", label_visibility="collapsed")
-            tone  = st.selectbox("Tone", ["Professional","Confident","Enthusiastic","Concise"])
-        with col2:
-            st.markdown('<div class="col-label">📄 Your CV / Experience</div>', unsafe_allow_html=True)
-            pdf_cl = st.file_uploader("Upload CV as PDF", type=["pdf"], key="cv_cl_pdf", label_visibility="collapsed")
-            cv_cl = ""
-            if pdf_cl:
-                cv_cl = extract_pdf_text(pdf_cl)
-                st.markdown(f'<div class="pdf-badge">✅ {pdf_cl.name} — {len(cv_cl)} chars extracted</div>', unsafe_allow_html=True)
-            else:
-                cv_cl = st.text_area("Or paste CV text", height=180, placeholder="Paste your CV or key experience...", key="cv_cl_paste")
-            name = st.text_input("Your Name", placeholder="e.g. Ahmed Al-Rashidi", key="cl_name")
-        
-        gen_cl = dual_buttons("Generate Cover Letter ✉️", "cl", ["jd_cl","cv_cl_paste","cl_name","cl_result"])
-        if gen_cl:
-            if (cv_cl and cv_cl.strip()) and (jd_cl and jd_cl.strip()):
-                with st.spinner("Writing your cover letter..."):
-                    st.session_state.cl_result = call_groq(
-                        f"You are an expert cover letter writer. Write a compelling, tailored cover letter in a {tone} tone. Sign off with the candidate's name.",
-                        f"Candidate Name: {name}\n\nCV/Experience:\n{cv_cl}\n\nJob Description:\n{jd_cl}")
-            else:
-                st.warning("Please fill in your CV and the Job Description.")
-        if "cl_result" in st.session_state:
-            st.markdown(f'<div class="result-box">{st.session_state.cl_result}</div>', unsafe_allow_html=True)
+        st.markdown(f"<h1>{page}</h1>", unsafe_allow_html=True)
+        c1, c2 = st.columns(2)
+        with c1:
+            st.markdown('<div class="col-label">📋 Job Details</div>', unsafe_allow_html=True)
+            jd_cl = st.text_area("JD", height=250, label_visibility="collapsed", key="jd_cl")
+        with c2:
+            st.markdown('<div class="col-label">📄 Your Experience</div>', unsafe_allow_html=True)
+            cv_cl = st.text_area("CV", height=250, label_visibility="collapsed", key="cv_cl")
 
-    # ── 3. INTERVIEW PREP ────────────────────────────────────────
+        if render_dual_buttons("Generate Letter ✉️", "cl_gen", ["jd_cl", "cv_cl", "cl_res"]):
+            with st.spinner("Writing..."):
+                st.session_state.cl_res = call_groq("Expert Writer", f"Write cover letter for JD: {jd_cl} and CV: {cv_cl}")
+        
+        if "cl_res" in st.session_state:
+            st.markdown(f'<div class="result-box">{st.session_state.cl_res}</div>', unsafe_allow_html=True)
+
+    # --- 3. Interview Prep ---
     elif page == "🎙️ Interview Prep":
-        st.markdown('<div class="page-title">🎙️ Interview Simulator</div>', unsafe_allow_html=True)
-        st.markdown('<div class="page-sub">Upload your CV and paste the Job Description — get questions tailored to your profile.</div>', unsafe_allow_html=True)
-        col1, col2 = st.columns(2)
-        with col1:
+        st.markdown(f"<h1>{page}</h1>", unsafe_allow_html=True)
+        c1, c2 = st.columns(2)
+        with c1:
             st.markdown('<div class="col-label">📋 Job Description</div>', unsafe_allow_html=True)
-            jd_iv = st.text_area("", height=280, placeholder="Paste the job description...", key="jd_iv", label_visibility="collapsed")
-        with col2:
-            st.markdown('<div class="col-label">📄 Your CV</div>', unsafe_allow_html=True)
-            pdf_iv = st.file_uploader("Upload CV as PDF", type=["pdf"], key="cv_iv_pdf", label_visibility="collapsed")
-            cv_iv = ""
-            if pdf_iv:
-                cv_iv = extract_pdf_text(pdf_iv)
-                st.markdown(f'<div class="pdf-badge">✅ {pdf_iv.name} — {len(cv_iv)} chars extracted</div>', unsafe_allow_html=True)
-            else:
-                cv_iv = st.text_area("Or paste CV text", height=200, placeholder="Paste your CV here...", key="cv_iv_paste")
-        
-        if "iv_question" not in st.session_state:
-            st.session_state.iv_question = ""
-        
-        gen_q = dual_buttons("Generate Question 🎯", "iv", ["jd_iv","cv_iv_paste","iv_question","iv_feedback"])
-        if gen_q:
-            if jd_iv and jd_iv.strip():
-                with st.spinner("Generating question..."):
-                    cv_context = f"\n\nCandidate CV:\n{cv_iv}" if (cv_iv and cv_iv.strip()) else ""
-                    st.session_state.iv_question = call_groq(
-                        "You are a senior hiring manager. Generate one realistic interview question tailored to the job description and candidate's CV. Just the question.",
-                        f"Job Description:\n{jd_iv}{cv_context}")
-            else:
-                st.warning("Please paste the Job Description first.")
-        
-        if st.session_state.iv_question:
-            st.markdown(f'<div class="result-box"><b>❓ Question:</b><br>{st.session_state.iv_question}</div>', unsafe_allow_html=True)
-            st.markdown('<div class="col-label" style="margin-top:16px">✍️ Your Answer</div>', unsafe_allow_html=True)
-            st.text_area("", height=180, placeholder="Type your answer here...", key="iv_answer", label_visibility="collapsed")
-            get_fb = dual_buttons("Get Feedback 💬", "fb", ["iv_question","iv_answer","iv_feedback"])
-            if get_fb:
-                ans = st.session_state.get("iv_answer","")
-                if ans.strip():
-                    with st.spinner("Evaluating your answer..."):
-                        st.session_state.iv_feedback = call_groq(
-                            "You are an expert interview coach. Give: 1) Score out of 10, 2) What was strong, 3) What was weak, 4) A suggested improved answer.",
-                            f"Question:\n{st.session_state.iv_question}\n\nAnswer:\n{ans}")
-                else:
-                    st.warning("Please type your answer first.")
-            if "iv_feedback" in st.session_state:
-                st.markdown(f'<div class="result-box">{st.session_state.iv_feedback}</div>', unsafe_allow_html=True)
+            jd_iv = st.text_area("JD", height=200, label_visibility="collapsed", key="jd_iv")
+        with c2:
+            st.markdown('<div class="col-label">📄 CV Context</div>', unsafe_allow_html=True)
+            cv_iv = st.text_area("CV", height=200, label_visibility="collapsed", key="cv_iv")
 
-    # ── 4. SALARY INSIGHT ────────────────────────────────────────
+        if render_dual_buttons("Generate Questions 🎙️", "iv_gen", ["jd_iv", "cv_iv", "iv_res"]):
+            with st.spinner("Preparing questions..."):
+                st.session_state.iv_res = call_groq("Interviewer", f"Questions for JD: {jd_iv} and CV: {cv_iv}")
+        
+        if "iv_res" in st.session_state:
+            st.markdown(f'<div class="result-box">{st.session_state.iv_res}</div>', unsafe_allow_html=True)
+
+    # --- 4. Salary Insight ---
     elif page == "💰 Salary Insight":
-        st.markdown('<div class="page-title">💰 Salary Intelligence</div>', unsafe_allow_html=True)
-        st.markdown('<div class="page-sub">Get a data-driven salary estimate and negotiation strategy.</div>', unsafe_allow_html=True)
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown('<div class="col-label">📌 Role Details</div>', unsafe_allow_html=True)
-            job_title  = st.text_input("Job Title", placeholder="e.g. Senior Data Scientist", key="sal_title")
-            location   = st.text_input("Location / Market", placeholder="e.g. Dubai, UAE", key="sal_loc")
-            experience = st.slider("Years of Experience", 0, 25, 3, key="sal_exp")
-        with col2:
-            st.markdown('<div class="col-label">🏭 Context</div>', unsafe_allow_html=True)
-            industry = st.text_input("Industry", placeholder="e.g. FinTech, Healthcare", key="sal_ind")
-            skills   = st.text_area("Key Skills", height=140, placeholder="e.g. Python, ML, SQL, AWS...", key="sal_skills")
-        
-        est_sal = dual_buttons("Estimate Salary 💰", "sal", ["sal_title","sal_loc","sal_ind","sal_skills","sal_result"])
-        if est_sal:
-            if (job_title and job_title.strip()) and (location and location.strip()):
-                with st.spinner("Calculating market value..."):
-                    st.session_state.sal_result = call_groq(
-                        "You are a compensation specialist. Provide: 1) Salary range (low/mid/high) in local currency, 2) Factors affecting the range, 3) Negotiation tips, 4) Benefits to negotiate.",
-                        f"Job Title: {job_title}\nLocation: {location}\nIndustry: {industry}\nExperience: {experience} years\nSkills: {skills}")
-            else:
-                st.warning("Please enter at least a Job Title and Location.")
-        if "sal_result" in st.session_state:
-            st.markdown(f'<div class="result-box">{st.session_state.sal_result}</div>', unsafe_allow_html=True)
+        st.markdown(f"<h1>{page}</h1>", unsafe_allow_html=True)
+        c1, c2 = st.columns(2)
+        with c1:
+            st.markdown('<div class="col-label">💼 Role & Location</div>', unsafe_allow_html=True)
+            role = st.text_input("Role", key="sal_role")
+            loc = st.text_input("Location", key="sal_loc")
+        with c2:
+            st.markdown('<div class="col-label">⚙️ Seniority</div>', unsafe_allow_html=True)
+            exp = st.selectbox("Years", ["0-2", "3-5", "5-10", "10+"], key="sal_exp")
 
-    # ── 5. SKILLS FINDER ─────────────────────────────────────────
+        if render_dual_buttons("Get Salary Insight 💰", "sal_gen", ["sal_role", "sal_loc", "sal_exp", "sal_res"]):
+            with st.spinner("Fetching market data..."):
+                st.session_state.sal_res = call_groq("Salary Expert", f"Salary for {role} in {loc} with {exp} years exp.")
+        
+        if "sal_res" in st.session_state:
+            st.markdown(f'<div class="result-box">{st.session_state.sal_res}</div>', unsafe_allow_html=True)
+
+    # --- 5. Skills Finder (الصفحة التي طلبت تعديلها) ---
     elif page == "🎓 Skills Finder":
-        st.markdown('<div class="page-title">🎓 Skills & Course Finder</div>', unsafe_allow_html=True)
-        st.markdown('<div class="page-sub">Enter a job title and get the essential skills, tools, and recommended courses you need to land the role.</div>', unsafe_allow_html=True)
+        st.markdown(f"<h1>{page}</h1>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#8b949e;'>Enter a job title and get the essential skills, tools, and recommended courses.</p>", unsafe_allow_html=True)
+        
         col1, col2 = st.columns(2)
         with col1:
             st.markdown('<div class="col-label">💼 Job Title</div>', unsafe_allow_html=True)
-            sk_title    = st.text_input("", placeholder="e.g. Data Scientist, UX Designer, Product Manager...", key="sk_title", label_visibility="collapsed")
-            st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
-            sk_level    = st.selectbox("Your Current Level", ["Beginner (no experience)","Junior (0–2 years)","Mid-level (2–5 years)","Senior (5+ years)"], key="sk_level")
-        with col2:
-            st.markdown('<div class="col-label">🌍 Context (Optional)</div>', unsafe_allow_html=True)
-            sk_industry = st.text_input("Industry Focus", placeholder="e.g. Finance, Healthcare, Tech...", key="sk_industry")
-            sk_note     = st.text_area("Any specific focus?", height=108, placeholder="e.g. I want to focus on cloud skills...", key="sk_note")
+            sk_title = st.text_input("Job Title", placeholder="e.g. Data Scientist...", label_visibility="collapsed", key="sk_t_in")
+            st.markdown('<div class="col-label">Level</div>', unsafe_allow_html=True)
+            sk_level = st.selectbox("Level", ["Beginner", "Junior", "Mid-level", "Senior"], label_visibility="collapsed", key="sk_l_in")
         
-        find_skills = dual_buttons("Find Skills & Courses 🎓", "sk", ["sk_title","sk_industry","sk_note","sk_result"])
-        if find_skills:
-            if sk_title and sk_title.strip():
-                with st.spinner("Researching skills and courses..."):
-                    extra = f"\nIndustry: {sk_industry}" if (sk_industry and sk_industry.strip()) else ""
-                    note  = f"\nFocus: {sk_note}" if (sk_note and sk_note.strip()) else ""
-                    st.session_state.sk_result = call_groq(
-                        "You are an expert career development advisor. Given a job title and level, provide:\n\n**🔑 Core Technical Skills** (6–8 must-have skills)\n\n**🤝 Soft Skills** (4–5 key soft skills)\n\n**🛠️ Tools & Technologies** (specific tools and platforms)\n\n**📚 Top 5 Courses** (with platform, e.g. 'Machine Learning — Coursera (Andrew Ng)')\n\n**🗺️ Learning Roadmap** (3-step path to job-ready)\n\n**⏱️ Estimated Time to Job-Ready**",
-                        f"Job Title: {sk_title}\nLevel: {sk_level}{extra}{note}")
+        with col2:
+            st.markdown('<div class="col-label">🌍 Industry (Optional)</div>', unsafe_allow_html=True)
+            sk_ind = st.text_input("Industry", placeholder="e.g. Tech, Finance...", label_visibility="collapsed", key="sk_i_in")
+            st.markdown('<div class="col-label">Any specific focus?</div>', unsafe_allow_html=True)
+            sk_focus = st.text_area("Focus", placeholder="e.g. Cloud, Mobile...", height=68, label_visibility="collapsed", key="sk_f_in")
+
+        # استخدام الدالة المصلحة للأزرار (كاملة العرض ولا يوجد أحمر)
+        if render_dual_buttons("Find Skills & Courses 🎓", "sk_finder", ["sk_t_in", "sk_l_in", "sk_i_in", "sk_f_in", "sk_res"]):
+            if sk_title:
+                with st.spinner("Curating your learning path..."):
+                    st.session_state.sk_res = call_groq(
+                        "You are a Career Advisor.", 
+                        f"Job Title: {sk_title}, Level: {sk_level}, Industry: {sk_ind}, Focus: {sk_focus}. Provide skills and top 5 courses."
+                    )
             else:
-                st.warning("Please enter a job title.")
-        if "sk_result" in st.session_state:
-            st.markdown(f'<div class="result-box">{st.session_state.sk_result}</div>', unsafe_allow_html=True)
+                st.warning("Please enter a Job Title.")
+
+        if "sk_res" in st.session_state:
+            st.markdown(f'<div class="result-box">{st.session_state.sk_res}</div>', unsafe_allow_html=True)
