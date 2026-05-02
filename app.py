@@ -24,8 +24,6 @@ st.markdown("""
         background: radial-gradient(circle at 50% 50%, #1a1f29 0%, #050505 100%);
         color: #e6edf3;
     }
-
-    /* ── LANDING ── */
     .hero-container { text-align: center; width: 100%; margin-bottom: 40px; }
     .main-title {
         font-size: 5rem !important; font-weight: 900;
@@ -35,11 +33,11 @@ st.markdown("""
     }
     .tagline { color: #8b949e; letter-spacing: 5px; text-transform: uppercase; width: 100%; text-align: center; }
     .feature-grid { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 50px; width: 100%; }
-    .service-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 30px 15px; width: 220px; text-align: center; }
+    .service-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 30px 15px; width: 200px; text-align: center; }
     .service-card h3 { color: #58a6ff; margin-bottom: 10px; }
     .service-card p { color: #8b949e; font-size: 0.8rem; }
 
-    /* ── SIDEBAR ── */
+    /* SIDEBAR */
     [data-testid="stSidebar"] { background: #0d1117 !important; border-right: 1px solid rgba(255,255,255,0.06) !important; }
     .sidebar-logo { font-size: 1.9rem; font-weight: 900; color: #e6edf3; padding: 24px 0 4px 4px; letter-spacing: -0.5px; }
     .sidebar-logo span { color: #58a6ff; }
@@ -56,7 +54,7 @@ st.markdown("""
     .sidebar-step { display: flex; align-items: center; gap: 10px; font-size: 0.78rem; color: #8b949e; }
     .sidebar-step-num { width: 22px; height: 22px; border-radius: 50%; background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.2); color: #58a6ff; font-size: 0.65rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
-    /* ── LOGOUT ── */
+    /* LOGOUT */
     [data-testid="stSidebar"] div.stButton > button {
         background: rgba(255,255,255,0.04) !important; border: 1px solid rgba(255,255,255,0.1) !important;
         border-radius: 10px !important; color: #8b949e !important; font-size: 0.88rem !important;
@@ -64,21 +62,40 @@ st.markdown("""
     }
     [data-testid="stSidebar"] div.stButton > button:hover { border-color: rgba(255,100,100,0.35) !important; color: #ff6b6b !important; background: rgba(255,100,100,0.05) !important; }
 
-    /* ── MAIN GREEN BUTTON ── */
+    /* GREEN BUTTON — landing only */
     [data-testid="stAppViewBlockContainer"] div.stButton > button {
         background: linear-gradient(135deg, #238636 0%, #2ea043 100%) !important;
         color: white !important; padding: 13px 0px !important; font-size: 1rem !important;
         font-weight: 600 !important; border-radius: 50px !important; width: 100% !important;
-        border: none !important; box-shadow: 0 8px 24px rgba(35,134,54,0.35) !important; transition: all 0.2s !important;
-    }
-    [data-testid="stAppViewBlockContainer"] div.stButton > button:hover {
-        box-shadow: 0 12px 32px rgba(35,134,54,0.5) !important; transform: translateY(-1px) !important;
+        border: none !important; box-shadow: 0 8px 24px rgba(35,134,54,0.35) !important;
     }
 
-    /* ── RESET HTML BUTTON — matches green button height exactly ── */
-    .reset-html-btn {
+    /* DUAL BUTTON ROW */
+    .btn-row {
+        display: flex;
+        gap: 12px;
         width: 100%;
-        padding: 13px 0;
+        margin-top: 16px;
+        margin-bottom: 4px;
+        align-items: stretch;
+    }
+    .btn-green {
+        flex: 1;
+        padding: 14px 0;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 50px;
+        border: none;
+        background: linear-gradient(135deg, #238636 0%, #2ea043 100%);
+        color: white;
+        cursor: pointer;
+        box-shadow: 0 8px 24px rgba(35,134,54,0.35);
+        transition: all 0.2s;
+    }
+    .btn-green:hover { box-shadow: 0 12px 32px rgba(35,134,54,0.5); transform: translateY(-1px); }
+    .btn-reset {
+        flex: 1;
+        padding: 14px 0;
         font-size: 1rem;
         font-weight: 600;
         border-radius: 50px;
@@ -87,12 +104,10 @@ st.markdown("""
         color: #8b949e;
         cursor: pointer;
         transition: all 0.2s;
-        display: block;
-        margin-top: 4px;
     }
-    .reset-html-btn:hover { border-color: rgba(255,100,100,0.4); color: #ff6b6b; background: rgba(255,100,100,0.05); }
+    .btn-reset:hover { border-color: rgba(255,100,100,0.4); color: #ff6b6b; background: rgba(255,100,100,0.05); }
 
-    /* ── CONTENT ── */
+    /* CONTENT */
     .page-title { font-size: 2rem; font-weight: 700; color: #58a6ff; margin-bottom: 6px; }
     .page-sub   { color: #8b949e; font-size: 0.9rem; margin-bottom: 24px; }
     .result-box { background: rgba(88,166,255,0.05); border: 1px solid rgba(88,166,255,0.15); border-radius: 12px; padding: 20px 24px; margin-top: 20px; white-space: pre-wrap; font-size: 0.92rem; line-height: 1.7; color: #e6edf3; }
@@ -118,26 +133,33 @@ def extract_pdf_text(uploaded_file):
         text += page.extract_text() or ""
     return text.strip()
 
-def reset_btn_html(reset_key):
-    """Renders a pure HTML reset button that triggers st query param rerun trick."""
+def dual_buttons(green_label, action_key, reset_session_keys):
+    """Pure HTML dual button row — always perfectly aligned."""
     st.markdown(f"""
-        <form action="" method="get">
-            <button class="reset-html-btn" name="reset" value="{reset_key}" type="submit">↺ Reset</button>
-        </form>
+    <div class="btn-row">
+        <button class="btn-green" onclick="document.getElementById('hidden_{action_key}').click()">
+            {green_label}
+        </button>
+        <button class="btn-reset" onclick="window.location.href='?reset={action_key}'">
+            ↺ Reset
+        </button>
+    </div>
     """, unsafe_allow_html=True)
-
-def check_reset(key, session_keys):
-    if st.query_params.get("reset") == key:
-        for k in session_keys:
-            if k in st.session_state:
-                del st.session_state[k]
+    # hidden real streamlit button for the green action
+    clicked = st.button(green_label, key=f"hidden_{action_key}", type="primary")
+    st.markdown(f"<style>#hidden_{action_key}, div[data-testid='stButton']:has(#hidden_{action_key}){{display:none!important}}</style>", unsafe_allow_html=True)
+    # handle reset
+    if st.query_params.get("reset") == action_key:
+        for k in reset_session_keys:
+            st.session_state.pop(k, None)
         st.query_params.clear()
         st.rerun()
+    return clicked
 
 if "entered" not in st.session_state:
     st.session_state.entered = False
 
-# ─── LANDING ──────────────────────────────────────────
+# ── LANDING ──────────────────────────────────────────────────────
 if not st.session_state.entered:
     st.markdown("""
         <div class="hero-container">
@@ -158,16 +180,8 @@ if not st.session_state.entered:
             st.session_state.entered = True
             st.rerun()
 
-# ─── INNER APP ────────────────────────────────────────
+# ── INNER APP ────────────────────────────────────────────────────
 else:
-    # reset checks
-    check_reset("cv",  ["jd_cv", "cv_paste", "cv_result"])
-    check_reset("cl",  ["jd_cl", "cv_cl_paste", "cl_name", "cl_result"])
-    check_reset("iv",  ["jd_iv", "cv_iv_paste", "iv_question", "iv_feedback"])
-    check_reset("fb",  ["iv_question", "iv_answer", "iv_feedback"])
-    check_reset("sal", ["sal_title", "sal_loc", "sal_ind", "sal_skills", "sal_result"])
-    check_reset("sk",  ["sk_title", "sk_result"])
-
     with st.sidebar:
         st.markdown("""
             <div class="sidebar-logo">🧠 Career<span>Mind</span></div>
@@ -175,7 +189,7 @@ else:
             <div class="sidebar-divider"></div>
         """, unsafe_allow_html=True)
         st.markdown('<div class="sidebar-section-title">Navigation</div>', unsafe_allow_html=True)
-        page = st.radio("", ["🔍 CV Matcher", "✉️ Cover Letter", "🎙️ Interview Prep", "💰 Salary Insight", "🎓 Skills Finder"], label_visibility="collapsed")
+        page = st.radio("", ["🔍 CV Matcher","✉️ Cover Letter","🎙️ Interview Prep","💰 Salary Insight","🎓 Skills Finder"], label_visibility="collapsed")
         st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
         st.markdown('<div class="sidebar-section-title">Platform Stats</div>', unsafe_allow_html=True)
         st.markdown("""
@@ -187,23 +201,23 @@ else:
         """, unsafe_allow_html=True)
         st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
         tips = {
-            "🔍 CV Matcher":     ("<b>Tip:</b> Upload your PDF CV for the most accurate ATS match score.", ["Upload or paste your CV", "Paste the job description", "Click Analyse Match"]),
-            "✉️ Cover Letter":   ("<b>Tip:</b> Match the tone to the company culture for best results.", ["Paste the job description", "Upload or paste your CV", "Generate your letter"]),
-            "🎙️ Interview Prep": ("<b>Tip:</b> Upload your CV so questions match your actual experience.", ["Upload your CV", "Paste the job description", "Generate & answer questions"]),
-            "💰 Salary Insight": ("<b>Tip:</b> Be specific with location and industry for accurate benchmarks.", ["Enter job title & location", "Add your skills", "Get salary estimate"]),
-            "🎓 Skills Finder":  ("<b>Tip:</b> Be specific with the job title to get the most relevant skills and courses.", ["Enter the job title", "Click Find Skills", "Review skills & courses"]),
+            "🔍 CV Matcher":     ("<b>Tip:</b> Upload your PDF CV for the most accurate ATS match score.", ["Upload or paste your CV","Paste the job description","Click Analyse Match"]),
+            "✉️ Cover Letter":   ("<b>Tip:</b> Match the tone to the company culture for best results.", ["Paste the job description","Upload or paste your CV","Generate your letter"]),
+            "🎙️ Interview Prep": ("<b>Tip:</b> Upload your CV so questions match your actual experience.", ["Upload your CV","Paste the job description","Generate & answer questions"]),
+            "💰 Salary Insight": ("<b>Tip:</b> Be specific with location and industry for accurate benchmarks.", ["Enter job title & location","Add your skills","Get salary estimate"]),
+            "🎓 Skills Finder":  ("<b>Tip:</b> Be specific with the job title to get the most relevant skills.", ["Enter the job title","Click Find Skills","Review skills & courses"]),
         }
         tip_text, steps = tips.get(page, ("", []))
         st.markdown(f'<div class="sidebar-tip">{tip_text}</div>', unsafe_allow_html=True)
         st.markdown('<div class="sidebar-section-title">How to use</div>', unsafe_allow_html=True)
-        steps_html = "".join([f'<div class="sidebar-step"><div class="sidebar-step-num">{i+1}</div>{s}</div>' for i, s in enumerate(steps)])
+        steps_html = "".join([f'<div class="sidebar-step"><div class="sidebar-step-num">{i+1}</div>{s}</div>' for i,s in enumerate(steps)])
         st.markdown(f'<div class="sidebar-steps">{steps_html}</div>', unsafe_allow_html=True)
         st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
         if st.button("🚪 Logout", use_container_width=True):
             st.session_state.entered = False
             st.rerun()
 
-    # ── 1. CV MATCHER ─────────────────────────────────
+    # ── 1. CV MATCHER ────────────────────────────────────────────
     if page == "🔍 CV Matcher":
         st.markdown('<div class="page-title">🔍 CV Matcher</div>', unsafe_allow_html=True)
         st.markdown('<div class="page-sub">Paste your Job Description on the left and upload/paste your CV on the right.</div>', unsafe_allow_html=True)
@@ -220,32 +234,27 @@ else:
                 st.markdown(f'<div class="pdf-badge">✅ {pdf_file.name} — {len(cv_text)} chars extracted</div>', unsafe_allow_html=True)
             else:
                 cv_text = st.text_area("Or paste CV text", height=220, placeholder="Paste your CV here...", key="cv_paste")
-        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        c1, c2 = st.columns(2)
-        with c1:
-            analyse = st.button("Analyse Match ⚡", key="btn_cv", use_container_width=True)
-        with c2:
-            reset_btn_html("cv")
+        analyse = dual_buttons("Analyse Match ⚡", "cv", ["jd_cv","cv_paste","cv_result"])
         if analyse:
             if cv_text.strip() and jd_text.strip():
                 with st.spinner("Analysing alignment..."):
                     st.session_state.cv_result = call_groq(
-                        "You are an expert career coach and ATS specialist. Analyse the match between the CV and the job description. Provide: 1) Match score out of 100, 2) Key strengths, 3) Missing keywords/skills, 4) Recommendations to improve the CV.",
+                        "You are an expert career coach and ATS specialist. Provide: 1) Match score out of 100, 2) Key strengths, 3) Missing keywords/skills, 4) Recommendations.",
                         f"CV:\n{cv_text}\n\nJob Description:\n{jd_text}")
             else:
                 st.warning("Please provide both your CV and the Job Description.")
         if "cv_result" in st.session_state:
             st.markdown(f'<div class="result-box">{st.session_state.cv_result}</div>', unsafe_allow_html=True)
 
-    # ── 2. COVER LETTER ───────────────────────────────
+    # ── 2. COVER LETTER ──────────────────────────────────────────
     elif page == "✉️ Cover Letter":
         st.markdown('<div class="page-title">✉️ Cover Letter Builder</div>', unsafe_allow_html=True)
         st.markdown('<div class="page-sub">Generate a tailored, professional cover letter in seconds.</div>', unsafe_allow_html=True)
         col1, col2 = st.columns(2)
         with col1:
             st.markdown('<div class="col-label">📋 Job Description</div>', unsafe_allow_html=True)
-            jd_cl = st.text_area("", height=220, placeholder="Paste the job description...", key="jd_cl", label_visibility="collapsed")
-            tone  = st.selectbox("Tone", ["Professional", "Confident", "Enthusiastic", "Concise"])
+            jd_cl = st.text_area("", height=240, placeholder="Paste the job description...", key="jd_cl", label_visibility="collapsed")
+            tone  = st.selectbox("Tone", ["Professional","Confident","Enthusiastic","Concise"])
         with col2:
             st.markdown('<div class="col-label">📄 Your CV / Experience</div>', unsafe_allow_html=True)
             pdf_cl = st.file_uploader("Upload CV as PDF", type=["pdf"], key="cv_cl_pdf", label_visibility="collapsed")
@@ -254,14 +263,9 @@ else:
                 cv_cl = extract_pdf_text(pdf_cl)
                 st.markdown(f'<div class="pdf-badge">✅ {pdf_cl.name} — {len(cv_cl)} chars extracted</div>', unsafe_allow_html=True)
             else:
-                cv_cl = st.text_area("Or paste CV text", height=160, placeholder="Paste your CV or key experience...", key="cv_cl_paste")
+                cv_cl = st.text_area("Or paste CV text", height=180, placeholder="Paste your CV or key experience...", key="cv_cl_paste")
             name = st.text_input("Your Name", placeholder="e.g. Ahmed Al-Rashidi", key="cl_name")
-        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        c1, c2 = st.columns(2)
-        with c1:
-            gen_cl = st.button("Generate Cover Letter ✉️", key="btn_cl", use_container_width=True)
-        with c2:
-            reset_btn_html("cl")
+        gen_cl = dual_buttons("Generate Cover Letter ✉️", "cl", ["jd_cl","cv_cl_paste","cl_name","cl_result"])
         if gen_cl:
             if cv_cl.strip() and jd_cl.strip():
                 with st.spinner("Writing your cover letter..."):
@@ -273,14 +277,14 @@ else:
         if "cl_result" in st.session_state:
             st.markdown(f'<div class="result-box">{st.session_state.cl_result}</div>', unsafe_allow_html=True)
 
-    # ── 3. INTERVIEW PREP ─────────────────────────────
+    # ── 3. INTERVIEW PREP ────────────────────────────────────────
     elif page == "🎙️ Interview Prep":
         st.markdown('<div class="page-title">🎙️ Interview Simulator</div>', unsafe_allow_html=True)
         st.markdown('<div class="page-sub">Upload your CV and paste the Job Description — get questions tailored to your profile.</div>', unsafe_allow_html=True)
         col1, col2 = st.columns(2)
         with col1:
             st.markdown('<div class="col-label">📋 Job Description</div>', unsafe_allow_html=True)
-            jd_iv = st.text_area("", height=260, placeholder="Paste the job description...", key="jd_iv", label_visibility="collapsed")
+            jd_iv = st.text_area("", height=280, placeholder="Paste the job description...", key="jd_iv", label_visibility="collapsed")
         with col2:
             st.markdown('<div class="col-label">📄 Your CV</div>', unsafe_allow_html=True)
             pdf_iv = st.file_uploader("Upload CV as PDF", type=["pdf"], key="cv_iv_pdf", label_visibility="collapsed")
@@ -289,47 +293,37 @@ else:
                 cv_iv = extract_pdf_text(pdf_iv)
                 st.markdown(f'<div class="pdf-badge">✅ {pdf_iv.name} — {len(cv_iv)} chars extracted</div>', unsafe_allow_html=True)
             else:
-                cv_iv = st.text_area("Or paste CV text", height=180, placeholder="Paste your CV here...", key="cv_iv_paste")
+                cv_iv = st.text_area("Or paste CV text", height=200, placeholder="Paste your CV here...", key="cv_iv_paste")
         if "iv_question" not in st.session_state:
             st.session_state.iv_question = ""
-        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        c1, c2 = st.columns(2)
-        with c1:
-            gen_q = st.button("Generate Question 🎯", key="btn_iv", use_container_width=True)
-        with c2:
-            reset_btn_html("iv")
+        gen_q = dual_buttons("Generate Question 🎯", "iv", ["jd_iv","cv_iv_paste","iv_question","iv_feedback"])
         if gen_q:
             if jd_iv.strip():
                 with st.spinner("Generating question..."):
                     cv_context = f"\n\nCandidate CV:\n{cv_iv}" if cv_iv.strip() else ""
                     st.session_state.iv_question = call_groq(
-                        "You are a senior hiring manager. Generate one realistic interview question tailored to both the job description and the candidate's CV. Just the question, nothing else.",
+                        "You are a senior hiring manager. Generate one realistic interview question tailored to the job description and candidate's CV. Just the question.",
                         f"Job Description:\n{jd_iv}{cv_context}")
             else:
                 st.warning("Please paste the Job Description first.")
         if st.session_state.iv_question:
             st.markdown(f'<div class="result-box"><b>❓ Question:</b><br>{st.session_state.iv_question}</div>', unsafe_allow_html=True)
-            st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
-            st.markdown('<div class="col-label">✍️ Your Answer</div>', unsafe_allow_html=True)
+            st.markdown('<div class="col-label" style="margin-top:16px">✍️ Your Answer</div>', unsafe_allow_html=True)
             st.text_area("", height=180, placeholder="Type your answer here...", key="iv_answer", label_visibility="collapsed")
-            c1, c2 = st.columns(2)
-            with c1:
-                get_fb = st.button("Get Feedback 💬", key="btn_fb", use_container_width=True)
-            with c2:
-                reset_btn_html("fb")
+            get_fb = dual_buttons("Get Feedback 💬", "fb", ["iv_question","iv_answer","iv_feedback"])
             if get_fb:
-                ans = st.session_state.get("iv_answer", "")
+                ans = st.session_state.get("iv_answer","")
                 if ans.strip():
                     with st.spinner("Evaluating your answer..."):
                         st.session_state.iv_feedback = call_groq(
-                            "You are an expert interview coach. Evaluate the candidate's answer. Give: 1) Score out of 10, 2) What was strong, 3) What was weak, 4) A suggested improved answer.",
-                            f"Question:\n{st.session_state.iv_question}\n\nCandidate's Answer:\n{ans}")
+                            "You are an expert interview coach. Give: 1) Score out of 10, 2) What was strong, 3) What was weak, 4) A suggested improved answer.",
+                            f"Question:\n{st.session_state.iv_question}\n\nAnswer:\n{ans}")
                 else:
                     st.warning("Please type your answer first.")
             if "iv_feedback" in st.session_state:
                 st.markdown(f'<div class="result-box">{st.session_state.iv_feedback}</div>', unsafe_allow_html=True)
 
-    # ── 4. SALARY INSIGHT ─────────────────────────────
+    # ── 4. SALARY INSIGHT ────────────────────────────────────────
     elif page == "💰 Salary Insight":
         st.markdown('<div class="page-title">💰 Salary Intelligence</div>', unsafe_allow_html=True)
         st.markdown('<div class="page-sub">Get a data-driven salary estimate and negotiation strategy.</div>', unsafe_allow_html=True)
@@ -342,50 +336,41 @@ else:
         with col2:
             st.markdown('<div class="col-label">🏭 Context</div>', unsafe_allow_html=True)
             industry = st.text_input("Industry", placeholder="e.g. FinTech, Healthcare", key="sal_ind")
-            skills   = st.text_area("Key Skills", height=120, placeholder="e.g. Python, ML, SQL, AWS...", key="sal_skills")
-        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        c1, c2 = st.columns(2)
-        with c1:
-            est_sal = st.button("Estimate Salary 💰", key="btn_sal", use_container_width=True)
-        with c2:
-            reset_btn_html("sal")
+            skills   = st.text_area("Key Skills", height=140, placeholder="e.g. Python, ML, SQL, AWS...", key="sal_skills")
+        est_sal = dual_buttons("Estimate Salary 💰", "sal", ["sal_title","sal_loc","sal_ind","sal_skills","sal_result"])
         if est_sal:
             if job_title.strip() and location.strip():
                 with st.spinner("Calculating market value..."):
                     st.session_state.sal_result = call_groq(
-                        "You are a compensation specialist. Provide: 1) Salary range (low/mid/high) in local currency, 2) Factors affecting the range, 3) Negotiation tips, 4) Benefits to negotiate beyond salary.",
-                        f"Job Title: {job_title}\nLocation: {location}\nIndustry: {industry}\nYears of Experience: {experience}\nKey Skills: {skills}")
+                        "You are a compensation specialist. Provide: 1) Salary range (low/mid/high) in local currency, 2) Factors affecting the range, 3) Negotiation tips, 4) Benefits to negotiate.",
+                        f"Job Title: {job_title}\nLocation: {location}\nIndustry: {industry}\nExperience: {experience} years\nSkills: {skills}")
             else:
                 st.warning("Please enter at least a Job Title and Location.")
         if "sal_result" in st.session_state:
             st.markdown(f'<div class="result-box">{st.session_state.sal_result}</div>', unsafe_allow_html=True)
 
-    # ── 5. SKILLS FINDER ──────────────────────────────
+    # ── 5. SKILLS FINDER ─────────────────────────────────────────
     elif page == "🎓 Skills Finder":
         st.markdown('<div class="page-title">🎓 Skills & Course Finder</div>', unsafe_allow_html=True)
         st.markdown('<div class="page-sub">Enter a job title and get the essential skills, tools, and recommended courses you need to land the role.</div>', unsafe_allow_html=True)
         col1, col2 = st.columns(2)
         with col1:
             st.markdown('<div class="col-label">💼 Job Title</div>', unsafe_allow_html=True)
-            sk_title = st.text_input("", placeholder="e.g. Data Scientist, UX Designer, Product Manager...", key="sk_title", label_visibility="collapsed")
-            sk_level = st.selectbox("Your Current Level", ["Beginner (no experience)", "Junior (0–2 years)", "Mid-level (2–5 years)", "Senior (5+ years)"])
+            sk_title    = st.text_input("", placeholder="e.g. Data Scientist, UX Designer, Product Manager...", key="sk_title", label_visibility="collapsed")
+            st.markdown('<div style="height:12px"></div>', unsafe_allow_html=True)
+            sk_level    = st.selectbox("Your Current Level", ["Beginner (no experience)","Junior (0–2 years)","Mid-level (2–5 years)","Senior (5+ years)"], key="sk_level")
         with col2:
             st.markdown('<div class="col-label">🌍 Context (Optional)</div>', unsafe_allow_html=True)
             sk_industry = st.text_input("Industry Focus", placeholder="e.g. Finance, Healthcare, Tech...", key="sk_industry")
-            sk_note     = st.text_area("Any specific focus?", height=100, placeholder="e.g. I want to focus on cloud skills...", key="sk_note")
-        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        c1, c2 = st.columns(2)
-        with c1:
-            find_skills = st.button("Find Skills & Courses 🎓", key="btn_sk", use_container_width=True)
-        with c2:
-            reset_btn_html("sk")
+            sk_note     = st.text_area("Any specific focus?", height=108, placeholder="e.g. I want to focus on cloud skills...", key="sk_note")
+        find_skills = dual_buttons("Find Skills & Courses 🎓", "sk", ["sk_title","sk_industry","sk_note","sk_result"])
         if find_skills:
             if sk_title.strip():
                 with st.spinner("Researching skills and courses..."):
                     extra = f"\nIndustry: {sk_industry}" if sk_industry.strip() else ""
-                    note  = f"\nSpecific focus: {sk_note}" if sk_note.strip() else ""
+                    note  = f"\nFocus: {sk_note}" if sk_note.strip() else ""
                     st.session_state.sk_result = call_groq(
-                        "You are an expert career development advisor. Given a job title and level, provide a comprehensive breakdown in this exact format:\n\n**🔑 Core Technical Skills** (list 6–8 must-have technical skills)\n\n**🤝 Soft Skills** (list 4–5 key soft skills for this role)\n\n**🛠️ Tools & Technologies** (list specific tools, software, platforms)\n\n**📚 Top Recommended Courses** (list 5 specific courses with platform name, e.g. 'Machine Learning — Coursera (Andrew Ng)')\n\n**🗺️ Learning Roadmap** (brief 3-step path to get job-ready)\n\n**⏱️ Estimated Time to Job-Ready:** (give a realistic estimate)",
+                        "You are an expert career development advisor. Given a job title and level, provide:\n\n**🔑 Core Technical Skills** (6–8 must-have skills)\n\n**🤝 Soft Skills** (4–5 key soft skills)\n\n**🛠️ Tools & Technologies** (specific tools and platforms)\n\n**📚 Top 5 Courses** (with platform, e.g. 'Machine Learning — Coursera (Andrew Ng)')\n\n**🗺️ Learning Roadmap** (3-step path to job-ready)\n\n**⏱️ Estimated Time to Job-Ready**",
                         f"Job Title: {sk_title}\nLevel: {sk_level}{extra}{note}")
             else:
                 st.warning("Please enter a job title.")
