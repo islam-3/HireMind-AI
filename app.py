@@ -195,7 +195,7 @@ if not st.session_state.entered:
             <div class="service-card"><h3>🎓 Skills</h3><p>Skills & Course Finder</p></div>
         </div>
     """, unsafe_allow_html=True)
-    c1, c2, c3 = st.columns([1.2, 1, 1, 1.2]) if False else st.columns([1, 1.2, 1.2, 1])
+    c1, c2, c3, c4 = st.columns([1, 1.2, 1.2, 1])
     with c2:
         st.markdown('<div class="green-btn">', unsafe_allow_html=True)
         if st.button("🚀 Get Started", use_container_width=True):
@@ -210,6 +210,7 @@ if not st.session_state.entered:
             st.session_state.auth_page = "register"
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
+
 
 # ── AUTH PAGE ────────────────────────────────────────────────────
 elif not st.session_state.logged_in:
