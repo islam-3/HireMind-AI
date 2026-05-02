@@ -354,7 +354,7 @@ else:
                     extra = f"\nIndustry: {sk_industry}" if sk_industry.strip() else ""
                     note  = f"\nFocus: {sk_note}" if sk_note.strip() else ""
                     st.session_state.sk_result = call_groq(
-                        "You are an expert career development advisor. Provide:\n\n**🔑 Core Technical Skills** (6–8 must-have skills)\n\n**🤝 Soft Skills** (4–5 key soft skills)\n\n**🛠️ Tools & Technologies** (specific tools and platforms)\n\n**📚 Top 5 Courses** (with platform, e.g. 'Machine Learning — Coursera (Andrew Ng)')\n\n**🗺️ Learning Roadmap** (3-step path to job-ready)\n\n**⏱️ Estimated Time to Job-Ready**",
+                        "You are a career advisor. For the given job title and level, list: 1) Core Technical Skills (6 items), 2) Soft Skills (4 items), 3) Tools & Technologies, 4) Top 5 Courses with platform name, 5) 3-step Learning Roadmap, 6) Estimated time to job-ready.",
                         f"Job Title: {sk_title}\nLevel: {sk_level}{extra}{note}")
             else:
                 st.warning("Please enter a job title.")
