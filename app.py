@@ -223,7 +223,7 @@ else:
                 cv_text = st.text_area("Or paste CV text", height=220, placeholder="Paste your CV here...", key="cv_paste", label_visibility="visible")
 
         st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        _, btn_col, _, reset_col, _ = st.columns([1.8, 1, 0.2, 0.8, 1.8])
+        _, btn_col, reset_col, _ = st.columns([1.5, 1, 1, 1.5])
         with btn_col:
             analyse = st.button("Analyse Match ⚡", use_container_width=True)
         with reset_col:
@@ -267,7 +267,7 @@ else:
             name = st.text_input("Your Name", placeholder="e.g. Ahmed Al-Rashidi", key="cl_name")
 
         st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        _, btn_col, _, reset_col, _ = st.columns([1.8, 1, 0.2, 0.8, 1.8])
+        _, btn_col, reset_col, _ = st.columns([1.5, 1, 1, 1.5])
         with btn_col:
             gen_cl = st.button("Generate Cover Letter ✉️", use_container_width=True)
         with reset_col:
@@ -312,7 +312,7 @@ else:
             st.session_state.iv_question = ""
 
         st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        _, btn_col, _, reset_col, _ = st.columns([1.8, 1, 0.2, 0.8, 1.8])
+        _, btn_col, reset_col, _ = st.columns([1.5, 1, 1, 1.5])
         with btn_col:
             gen_q = st.button("Generate Question 🎯", use_container_width=True)
         with reset_col:
@@ -338,7 +338,7 @@ else:
             st.markdown('<div class="col-label">✍️ Your Answer</div>', unsafe_allow_html=True)
             user_answer = st.text_area("", height=180, placeholder="Type your answer here...", key="iv_answer", label_visibility="collapsed")
 
-            _, btn_col2, _, reset_col2, _ = st.columns([1.8, 1, 0.2, 0.8, 1.8])
+            _, btn_col2, reset_col2, _ = st.columns([1.5, 1, 1, 1.5])
             with btn_col2:
                 get_fb = st.button("Get Feedback 💬", use_container_width=True)
             with reset_col2:
@@ -377,7 +377,7 @@ else:
             skills   = st.text_area("Key Skills", height=120, placeholder="e.g. Python, ML, SQL, AWS...", key="sal_skills")
 
         st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        _, btn_col, _, reset_col, _ = st.columns([1.8, 1, 0.2, 0.8, 1.8])
+        _, btn_col, reset_col, _ = st.columns([1.5, 1, 1, 1.5])
         with btn_col:
             est_sal = st.button("Estimate Salary 💰", use_container_width=True)
         with reset_col:
