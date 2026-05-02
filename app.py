@@ -75,7 +75,7 @@ st.markdown("""
 .service-card p { color: #8b949e; font-size: 0.8rem; }
 
 /* AUTH PAGE */
-.auth-title { font-size: 1.5rem; font-weight: 700; color: #e6edf3; margin-bottom: 6px; text-align: center; }
+.auth-title { font-size: 2.2rem; font-weight: 800; color: #e6edf3; margin-bottom: 8px; text-align: center; }
 .auth-sub { font-size: 0.82rem; color: #8b949e; text-align: center; margin-bottom: 16px; }
 
 /* SIDEBAR */
