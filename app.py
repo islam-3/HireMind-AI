@@ -237,7 +237,7 @@ elif not st.session_state.logged_in:
                 st.warning("Please fill in all fields")
         st.markdown('</div>', unsafe_allow_html=True)
         st.markdown('<div style="height:16px"></div>', unsafe_allow_html=True)
-        st.markdown('<div style="text-align:center;font-size:0.82rem;color:#8b949e;">Don't have an account?</div>', unsafe_allow_html=True)
+        st.markdown('<div style="text-align:center;font-size:0.82rem;color:#8b949e;">No account yet?</div>', unsafe_allow_html=True)
         if st.button("Create a new account →", key="go_register", use_container_width=True):
             st.session_state.auth_page = "register"
             st.rerun()
