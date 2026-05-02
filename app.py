@@ -37,28 +37,35 @@ st.markdown("""
 .service-card h3 { color: #58a6ff; margin-bottom: 10px; }
 .service-card p { color: #8b949e; font-size: 0.8rem; }
 
-/* clickable card buttons */
-.card-btn div.stButton > button {
-    background: rgba(255,255,255,0.03) !important;
-    border: 1px solid rgba(255,255,255,0.1) !important;
-    border-radius: 20px !important;
-    padding: 28px 12px !important;
-    width: 100% !important;
-    height: auto !important;
-    min-height: 120px !important;
-    color: #e6edf3 !important;
-    font-size: 1rem !important;
-    font-weight: 400 !important;
-    box-shadow: none !important;
-    transition: border-color 0.2s, background 0.2s !important;
-    white-space: pre-line !important;
-    line-height: 1.6 !important;
+/* card container is relative so button can overlay */
+div[data-testid="stColumn"] > div {
+    position: relative !important;
 }
-.card-btn div.stButton > button:hover {
+/* hide "Open" button text, make it transparent overlay on card */
+div[data-testid="stColumn"] div.stButton > button {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 160px !important;
+    opacity: 0 !important;
+    cursor: pointer !important;
+    z-index: 10 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+/* card hover effect via sibling — CSS only */
+.service-card {
+    transition: border-color 0.2s, background 0.2s, transform 0.2s !important;
+    cursor: pointer !important;
+}
+div[data-testid="stColumn"]:hover .service-card {
     background: rgba(88,166,255,0.06) !important;
     border-color: rgba(88,166,255,0.35) !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important;
+    transform: translateY(-3px) !important;
 }
 
 /* SIDEBAR */
@@ -191,13 +198,16 @@ if not st.session_state.entered:
     cols = st.columns(5)
     for i, (icon_title, desc, page_key) in enumerate(cards):
         with cols[i]:
-            st.markdown('<div class="card-btn">', unsafe_allow_html=True)
-            label = icon_title + "\n" + desc
-            if st.button(label, key=f"card_{i}", use_container_width=True):
+            st.markdown(f"""
+                <div class="service-card" id="card-{i}">
+                    <h3>{icon_title}</h3>
+                    <p>{desc}</p>
+                </div>
+            """, unsafe_allow_html=True)
+            if st.button("Open", key=f"card_{i}", use_container_width=True):
                 st.session_state.entered = True
                 st.session_state.page = page_key
                 st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
 
 # ── INNER APP ────────────────────────────────────────────────────
 else:
