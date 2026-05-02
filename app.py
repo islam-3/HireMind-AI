@@ -33,7 +33,8 @@ st.markdown("""
 }
 .tagline { color: #8b949e; letter-spacing: 5px; text-transform: uppercase; width: 100%; text-align: center; }
 .feature-grid { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 50px; width: 100%; }
-.service-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 30px 15px; width: 200px; text-align: center; }
+.service-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 30px 15px; width: 200px; text-align: center; cursor: pointer; transition: all 0.2s; }
+.service-card:hover { background: rgba(88,166,255,0.07); border-color: rgba(88,166,255,0.4); transform: translateY(-3px); }
 .service-card h3 { color: #58a6ff; margin-bottom: 10px; }
 .service-card p { color: #8b949e; font-size: 0.8rem; }
 
@@ -189,31 +190,44 @@ if not st.session_state.entered:
             <h1 class="main-title">CareerMind AI</h1>
             <p class="tagline">Architecting Your Professional Future</p>
         </div>
+        <div class="feature-grid">
+            <div class="service-card" onclick="window.parent.document.querySelectorAll('button[data-testid=\"baseButton-secondary\"]')[0].click()">
+                <h3>🔍 Audit</h3><p>CV & JD Alignment</p>
+            </div>
+            <div class="service-card" onclick="window.parent.document.querySelectorAll('button[data-testid=\"baseButton-secondary\"]')[1].click()">
+                <h3>✉️ Script</h3><p>Cover Letter Builder</p>
+            </div>
+            <div class="service-card" onclick="window.parent.document.querySelectorAll('button[data-testid=\"baseButton-secondary\"]')[2].click()">
+                <h3>🎙️ Master</h3><p>Interview Simulator</p>
+            </div>
+            <div class="service-card" onclick="window.parent.document.querySelectorAll('button[data-testid=\"baseButton-secondary\"]')[3].click()">
+                <h3>💰 Value</h3><p>Salary Estimation</p>
+            </div>
+            <div class="service-card" onclick="window.parent.document.querySelectorAll('button[data-testid=\"baseButton-secondary\"]')[4].click()">
+                <h3>🎓 Skills</h3><p>Skills & Course Finder</p>
+            </div>
+        </div>
     """, unsafe_allow_html=True)
 
-    cards = [
-        ("🔍 Audit",   "CV & JD Alignment",     "🔍 CV Matcher"),
-        ("✉️ Script",  "Cover Letter Builder",   "✉️ Cover Letter"),
-        ("🎙️ Master",  "Interview Simulator",    "🎙️ Interview Prep"),
-        ("💰 Value",   "Salary Estimation",      "💰 Salary Insight"),
-        ("🎓 Skills",  "Skills & Course Finder", "🎓 Skills Finder"),
-    ]
-    st.markdown('<div class="landing-cards">', unsafe_allow_html=True)
-    cols = st.columns(5, gap="small")
-    for i, (icon_title, desc, page_key) in enumerate(cards):
-        with cols[i]:
-            if st.button(icon_title + "  \n" + desc, key=f"card_{i}", use_container_width=True):
-                st.session_state.entered = True
-                st.session_state.page = page_key
-                st.rerun()
+    # Hidden real buttons — one per card
+    pages = ["🔍 CV Matcher","✉️ Cover Letter","🎙️ Interview Prep","💰 Salary Insight","🎓 Skills Finder"]
+    st.markdown('<div style="display:none">', unsafe_allow_html=True)
+    for i, p in enumerate(pages):
+        if st.button(p, key=f"hcard_{i}"):
+            st.session_state.entered = True
+            st.session_state.page = p
+            st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("<div style='height:24px'></div>", unsafe_allow_html=True)
     _, col, _ = st.columns([2, 1, 2])
     with col:
+        st.markdown('<div class="green-btn">', unsafe_allow_html=True)
         if st.button("Access Professional Suite →", key="btn_enter", use_container_width=True):
             st.session_state.entered = True
             st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
 
 # ── INNER APP ────────────────────────────────────────────────────
 else:
