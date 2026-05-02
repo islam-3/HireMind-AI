@@ -75,17 +75,8 @@ st.markdown("""
 .service-card p { color: #8b949e; font-size: 0.8rem; }
 
 /* AUTH PAGE */
-.auth-box {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 20px;
-    padding: 40px 36px;
-    width: 100%;
-    max-width: 420px;
-    margin: 0 auto;
-}
 .auth-title { font-size: 1.5rem; font-weight: 700; color: #e6edf3; margin-bottom: 6px; text-align: center; }
-.auth-sub { font-size: 0.82rem; color: #8b949e; text-align: center; margin-bottom: 28px; }
+.auth-sub { font-size: 0.82rem; color: #8b949e; text-align: center; margin-bottom: 16px; }
 
 /* SIDEBAR */
 [data-testid="stSidebar"] { background: #0d1117 !important; border-right: 1px solid rgba(255,255,255,0.06) !important; }
@@ -216,7 +207,6 @@ elif not st.session_state.logged_in:
     st.markdown('<div style="height:40px"></div>', unsafe_allow_html=True)
 
     if st.session_state.auth_page == "login":
-        st.markdown('<div class="auth-box">', unsafe_allow_html=True)
         st.markdown('<div class="auth-title">👋 Welcome Back</div>', unsafe_allow_html=True)
         st.markdown('<div class="auth-sub">Sign in to access your tools</div>', unsafe_allow_html=True)
         email    = st.text_input("Email", placeholder="you@example.com", key="li_email")
@@ -241,10 +231,8 @@ elif not st.session_state.logged_in:
         if st.button("Create a new account →", key="go_register", use_container_width=True):
             st.session_state.auth_page = "register"
             st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
 
     else:
-        st.markdown('<div class="auth-box">', unsafe_allow_html=True)
         st.markdown('<div class="auth-title">✨ Create Account</div>', unsafe_allow_html=True)
         st.markdown('<div class="auth-sub">Join CareerMind AI for free</div>', unsafe_allow_html=True)
         username = st.text_input("Full Name", placeholder="Ahmed Al-Rashidi", key="rg_name")
@@ -277,7 +265,6 @@ elif not st.session_state.logged_in:
         if st.button("Sign in →", key="go_login", use_container_width=True):
             st.session_state.auth_page = "login"
             st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
 
 # ── INNER APP ────────────────────────────────────────────────────
 else:
