@@ -26,7 +26,7 @@ def get_sheet():
     return client.open_by_key(SHEET_ID).sheet1
 
 def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
+    return password  # plain text for now
 
 def register_user(username, email, password):
     sheet = get_sheet()
