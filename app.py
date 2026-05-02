@@ -37,29 +37,38 @@ st.markdown("""
 .service-card h3 { color: #58a6ff; margin-bottom: 10px; }
 .service-card p { color: #8b949e; font-size: 0.8rem; }
 
-/* landing card buttons styled as cards */
+/* landing card buttons styled as original cards */
 .landing-cards div.stButton > button {
     background: rgba(255,255,255,0.03) !important;
     border: 1px solid rgba(255,255,255,0.1) !important;
     border-radius: 20px !important;
     width: 100% !important;
-    min-height: 140px !important;
+    height: 160px !important;
     color: #e6edf3 !important;
-    font-size: 1rem !important;
+    font-size: 0.85rem !important;
     font-weight: 400 !important;
     box-shadow: none !important;
-    padding: 24px 16px !important;
-    line-height: 1.8 !important;
+    padding: 20px 12px !important;
+    line-height: 2.2 !important;
     transition: all 0.2s !important;
-    white-space: pre-wrap !important;
+    white-space: normal !important;
     text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 .landing-cards div.stButton > button:hover {
     background: rgba(88,166,255,0.07) !important;
     border-color: rgba(88,166,255,0.4) !important;
     transform: translateY(-3px) !important;
     box-shadow: 0 8px 24px rgba(0,0,0,0.25) !important;
-    color: #ffffff !important;
+}
+.landing-cards div.stButton > button p:first-child {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    color: #58a6ff !important;
+    margin-bottom: 6px !important;
 }
 
 /* SIDEBAR */
@@ -193,8 +202,7 @@ if not st.session_state.entered:
     cols = st.columns(5, gap="small")
     for i, (icon_title, desc, page_key) in enumerate(cards):
         with cols[i]:
-            btn_label = icon_title + "\n\n" + desc
-            if st.button(btn_label, key=f"card_{i}", use_container_width=True):
+            if st.button(icon_title + "  \n" + desc, key=f"card_{i}", use_container_width=True):
                 st.session_state.entered = True
                 st.session_state.page = page_key
                 st.rerun()
