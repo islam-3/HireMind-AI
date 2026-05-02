@@ -25,37 +25,54 @@ st.markdown("""
     color: #e6edf3;
 }
 .hero-container { text-align: center; width: 100%; margin-bottom: 40px; }
-/* ── CARDS ── */
-.cards-wrap div.stButton > button {
-    background: rgba(255,255,255,0.03) !important;
-    border: 1px solid rgba(255,255,255,0.08) !important;
-    border-radius: 20px !important;
+/* ── SERVICE CARDS ── */
+.scard {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 28px 14px 24px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+    transition: all 0.2s;
+}
+.scard-title {
+    color: #58a6ff;
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+.scard-desc {
+    color: #8b949e;
+    font-size: 0.8rem;
+}
+/* invisible button overlaid on top of the card */
+div[data-testid="stColumn"] div.stButton > button {
+    position: absolute !important;
+    top: 0 !important; left: 0 !important;
     width: 100% !important;
-    height: 160px !important;
-    color: #8b949e !important;
-    font-size: 0.82rem !important;
-    font-weight: 400 !important;
+    height: 100% !important;
+    min-height: 130px !important;
+    opacity: 0 !important;
+    cursor: pointer !important;
+    z-index: 999 !important;
+    background: transparent !important;
+    border: none !important;
     box-shadow: none !important;
-    padding: 0 12px !important;
-    transition: all 0.2s !important;
-    white-space: pre-line !important;
-    text-align: center !important;
-    line-height: 2 !important;
+    padding: 0 !important;
 }
-.cards-wrap div.stButton > button:hover {
-    background: rgba(88,166,255,0.06) !important;
-    border-color: rgba(88,166,255,0.35) !important;
-    transform: translateY(-3px) !important;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2) !important;
-    color: #e6edf3 !important;
+div[data-testid="stColumn"] {
+    position: relative !important;
 }
-/* make first line (emoji + title) blue and bigger */
-.cards-wrap div.stButton > button > div:first-child p:first-child,
-.cards-wrap div.stButton > button p:first-child {
-    color: #58a6ff !important;
-    font-size: 1.05rem !important;
-    font-weight: 700 !important;
+div[data-testid="stColumn"]:hover .scard {
+    background: rgba(88,166,255,0.07);
+    border-color: rgba(88,166,255,0.35);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
 }
+
+
 
 
 
@@ -200,15 +217,18 @@ if not st.session_state.entered:
         ("💰", "Value",  "Salary Estimation",      "💰 Salary Insight"),
         ("🎓", "Skills", "Skills & Course Finder", "🎓 Skills Finder"),
     ]
-    st.markdown('<div class="cards-wrap">', unsafe_allow_html=True)
     cols = st.columns(5, gap="medium")
     for i, (emoji, title, desc, page_key) in enumerate(cards):
         with cols[i]:
-            if st.button(f"{emoji}  {title}\n{desc}", key=f"card_{i}", use_container_width=True):
+            st.markdown(f'''
+            <div class="scard">
+                <div class="scard-title">{emoji} {title}</div>
+                <div class="scard-desc">{desc}</div>
+            </div>''', unsafe_allow_html=True)
+            if st.button("​", key=f"card_{i}", use_container_width=True):
                 st.session_state.entered = True
                 st.session_state.page = page_key
                 st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("<div style='height:32px'></div>", unsafe_allow_html=True)
     _, col, _ = st.columns([2, 1, 2])
