@@ -46,7 +46,7 @@ def login_user(email, password):
     for r in records:
         if r["email"] == email and r["password"] == hash_password(password):
             return True, r["username"]
-    return False, "البريد أو Password غلط"
+    return False, "Incorrect email or password"
 
 st.markdown("""
 <style>
@@ -251,7 +251,7 @@ elif not st.session_state.logged_in:
         username = st.text_input("Full Name", placeholder="Ahmed Al-Rashidi", key="rg_name")
         email    = st.text_input("Email", placeholder="you@example.com", key="rg_email")
         password = st.text_input("Password", type="password", key="rg_pass")
-        password2= st.text_input("تأكيد Password", type="password", key="rg_pass2")
+        password2= st.text_input("Confirm Password", type="password", key="rg_pass2")
         st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
         st.markdown('<div class="green-btn">', unsafe_allow_html=True)
         if st.button("Create Account", use_container_width=True, key="do_register"):
@@ -261,7 +261,7 @@ elif not st.session_state.logged_in:
                 elif len(password) < 6:
                     st.error("Password يجب أن تكون 6 أحرف على الأقل")
                 else:
-                    with st.spinner("جارٍ Create Account..."):
+                    with st.spinner("Creating your account..."):
                         ok, msg = register_user(username, email, password)
                     if ok:
                         st.success(msg)
