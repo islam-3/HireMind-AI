@@ -17,7 +17,6 @@ st.set_page_config(page_title="CareerMind AI", layout="wide", initial_sidebar_st
 # ── GOOGLE SHEETS SETUP ──────────────────────────────────────────
 SHEET_ID = "1Dt4GOPOThY3c1jDJZ1QCCmD96HiM3IdmmQhQazBl5Ds"
 
-@st.cache_resource
 def get_sheet():
     creds = Credentials.from_service_account_info(
         st.secrets["gcp_service_account"],
