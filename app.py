@@ -209,24 +209,25 @@ elif not st.session_state.logged_in:
     if st.session_state.auth_page == "login":
         st.markdown('<div class="auth-title">👋 Welcome Back</div>', unsafe_allow_html=True)
         st.markdown('<div class="auth-sub">Sign in to access your tools</div>', unsafe_allow_html=True)
-        email    = st.text_input("Email", placeholder="you@example.com", key="li_email")
-        password = st.text_input("Password", type="password", key="li_pass")
-        st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
-        st.markdown('<div class="green-btn">', unsafe_allow_html=True)
-        if st.button("Sign In", use_container_width=True, key="do_login"):
-            if email and password:
-                with st.spinner("Verifying..."):
-                    ok, result = login_user(email, password)
-                if ok:
-                    st.session_state.logged_in = True
-                    st.session_state.username  = result
-                    st.rerun()
+        with st.form("login_form"):
+            email    = st.text_input("Email", placeholder="you@example.com")
+            password = st.text_input("Password", type="password")
+            st.markdown('<div class="green-btn">', unsafe_allow_html=True)
+            submitted = st.form_submit_button("Sign In", use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+            if submitted:
+                if email and password:
+                    with st.spinner("Verifying..."):
+                        ok, result = login_user(email, password)
+                    if ok:
+                        st.session_state.logged_in = True
+                        st.session_state.username  = result
+                        st.rerun()
+                    else:
+                        st.error(result)
                 else:
-                    st.error(result)
-            else:
-                st.warning("Please fill in all fields")
-        st.markdown('</div>', unsafe_allow_html=True)
-        st.markdown('<div style="height:16px"></div>', unsafe_allow_html=True)
+                    st.warning("Please fill in all fields")
+        st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
         st.markdown('<div style="text-align:center;font-size:0.82rem;color:#8b949e;">No account yet?</div>', unsafe_allow_html=True)
         if st.button("Create a new account →", key="go_register", use_container_width=True):
             st.session_state.auth_page = "register"
