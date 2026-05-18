@@ -130,7 +130,7 @@ st.markdown("""
 
 .page-title { font-size: 2rem; font-weight: 700; color: #58a6ff; margin-bottom: 6px; }
 .page-sub   { color: #8b949e; font-size: 0.9rem; margin-bottom: 24px; }
-.result-box { background: rgba(88,166,255,0.05); border: 1px solid rgba(88,166,255,0.15); border-radius: 12px; padding: 20px 24px; margin-top: 20px; white-space: pre-wrap; font-size: 0.92rem; line-height: 1.7; color: #e6edf3; }
+.result-box { background: rgba(88,166,255,0.05); border: 1px solid rgba(88,166,255,0.15); border-radius: 12px; padding: 24px 28px; margin-top: 20px; font-size: 0.92rem; line-height: 1.75; color: #e6edf3; }
 .col-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #58a6ff; margin-bottom: 6px; }
 .pdf-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(63,185,80,0.1); border: 1px solid rgba(63,185,80,0.25); border-radius: 8px; padding: 8px 14px; font-size: 0.82rem; color: #3fb950; margin-bottom: 8px; }
 </style>
@@ -146,6 +146,29 @@ def call_groq(system_prompt, user_prompt):
         temperature=0.7, max_tokens=2048,
     )
     return response.choices[0].message.content
+
+def format_result(text):
+    import re
+    text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
+    result = []
+    for line in text.split("\n"):
+        line = line.rstrip()
+        if not line:
+            continue
+        elif re.match(r"^\s*[\*\-\u2022]\s+", line):
+            item = re.sub(r"^\s*[\*\-\u2022]\s+", "", line)
+            result.append('<div style="display:flex;gap:8px;margin-bottom:6px"><span style="color:#58a6ff;flex-shrink:0">&#9658;</span><span>' + item + "</span></div>")
+        elif re.match(r"^\s*\d+\.\s+", line):
+            item = re.sub(r"^\s*\d+\.\s+", "", line)
+            num = re.match(r"^\s*(\d+)\.", line).group(1)
+            result.append('<div style="display:flex;gap:8px;margin-bottom:6px"><span style="color:#58a6ff;font-weight:700;flex-shrink:0;min-width:18px">' + num + '.</span><span>' + item + "</span></div>")
+        elif line.startswith("#"):
+            heading = re.sub(r"^#+\s*", "", line)
+            result.append('<div style="color:#58a6ff;font-weight:700;margin-top:14px;margin-bottom:6px;border-bottom:1px solid rgba(88,166,255,0.15);padding-bottom:4px">' + heading + "</div>")
+        else:
+            result.append('<div style="margin-bottom:5px">' + line + "</div>")
+    return "".join(result)
+
 
 def extract_pdf_text(uploaded_file):
     reader = PyPDF2.PdfReader(io.BytesIO(uploaded_file.read()))
@@ -359,7 +382,7 @@ else:
             else:
                 st.warning("Please provide both your CV and the Job Description.")
         if "cv_result" in st.session_state:
-            st.markdown(f'<div class="result-box">{st.session_state.cv_result}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="result-box">{format_result(st.session_state.cv_result)}</div>', unsafe_allow_html=True)
 
     # ── 2. COVER LETTER ──────────────────────────────────────────
     elif page == "✉️ Cover Letter":
@@ -389,7 +412,7 @@ else:
             else:
                 st.warning("Please fill in your CV and the Job Description.")
         if "cl_result" in st.session_state:
-            st.markdown(f'<div class="result-box">{st.session_state.cl_result}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="result-box">{format_result(st.session_state.cl_result)}</div>', unsafe_allow_html=True)
 
     # ── 3. INTERVIEW PREP ────────────────────────────────────────
     elif page == "🎙️ Interview Prep":
@@ -419,7 +442,7 @@ else:
             else:
                 st.warning("Please paste the Job Description first.")
         if st.session_state.iv_question:
-            st.markdown(f'<div class="result-box"><b>❓ Question:</b><br>{st.session_state.iv_question}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="result-box"><b>❓ Question:</b><br><br>{format_result(st.session_state.iv_question)}</div>', unsafe_allow_html=True)
             st.markdown('<div class="col-label" style="margin-top:16px">✍️ Your Answer</div>', unsafe_allow_html=True)
             st.text_area("", height=180, placeholder="Type your answer here...", key="iv_answer", label_visibility="collapsed")
             if btn_row("Get Feedback 💬", "fb", ["iv_question","iv_answer","iv_feedback"]):
@@ -432,7 +455,7 @@ else:
                 else:
                     st.warning("Please type your answer first.")
             if "iv_feedback" in st.session_state:
-                st.markdown(f'<div class="result-box">{st.session_state.iv_feedback}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="result-box">{format_result(st.session_state.iv_feedback)}</div>', unsafe_allow_html=True)
 
     # ── 4. SALARY INSIGHT ────────────────────────────────────────
     elif page == "💰 Salary Insight":
@@ -467,7 +490,7 @@ else:
             else:
                 st.warning("Please enter at least a Job Title and Location.")
         if "sal_result" in st.session_state:
-            st.markdown(f'<div class="result-box">{st.session_state.sal_result}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="result-box">{format_result(st.session_state.sal_result)}</div>', unsafe_allow_html=True)
 
     # ── 5. SKILLS FINDER ─────────────────────────────────────────
     elif page == "🎓 Skills Finder":
@@ -495,4 +518,4 @@ else:
             else:
                 st.warning("Please enter a job title.")
         if "sk_result" in st.session_state:
-            st.markdown(f'<div class="result-box">{st.session_state.sk_result}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="result-box">{format_result(st.session_state.sk_result)}</div>', unsafe_allow_html=True)
