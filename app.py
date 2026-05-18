@@ -452,7 +452,17 @@ else:
             if job_title.strip() and location.strip():
                 with st.spinner("Calculating market value..."):
                     st.session_state.sal_result = call_groq(
-                        "You are a compensation specialist. Provide: 1) Salary range (low/mid/high) in local currency, 2) Factors, 3) Negotiation tips, 4) Benefits to negotiate.",
+                        """You are a senior compensation consultant with up-to-date knowledge of global job markets as of 2024-2025. Your salary estimates must reflect CURRENT market rates for the SPECIFIC city and country provided. Important rules:
+- Use the correct local currency (e.g. Turkish Lira TRY for Turkey, AED for UAE, USD for USA, EUR for Germany, SAR for Saudi Arabia)
+- For Istanbul/Turkey: salaries are typically 30,000–120,000 TRY/month for mid-senior roles in 2024-2025
+- For Dubai/UAE: 8,000–35,000 AED/month for mid-senior roles
+- For Saudi Arabia: 8,000–30,000 SAR/month
+- For Germany: 3,500–8,000 EUR/month
+- Always provide 3 tiers: Entry-level, Mid-level, Senior
+- Include annual equivalent
+- Give 3 practical negotiation tips specific to that market
+- Mention 3 benefits to negotiate beyond base salary
+- Be realistic and specific — do NOT give generic or outdated figures""",
                         f"Job Title: {job_title}\nLocation: {location}\nIndustry: {industry}\nExperience: {experience} years\nSkills: {skills}")
             else:
                 st.warning("Please enter at least a Job Title and Location.")
