@@ -69,10 +69,10 @@ st.markdown("""
 }
 .hero-container { text-align: center; width: 100%; margin-bottom: 40px; }
 .main-title {
-    font-size: 5rem !important; font-weight: 900;
+    font-size: clamp(2.2rem, 8vw, 5rem) !important; font-weight: 900;
     background: linear-gradient(90deg, #58a6ff, #3fb950);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    margin-bottom: 0px; display: inline-block;
+    margin-bottom: 0px; display: inline-block; white-space: nowrap;
 }
 .tagline { color: #8b949e; letter-spacing: 5px; text-transform: uppercase; width: 100%; text-align: center; }
 .feature-grid { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 50px; width: 100%; }
